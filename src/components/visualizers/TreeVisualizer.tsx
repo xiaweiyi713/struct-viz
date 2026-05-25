@@ -86,10 +86,20 @@ export default function TreeVisualizer({
     let container = d3svg.select<SVGGElement>(".tv-container");
 
     if (container.empty()) {
-      container = d3svg.append("g").attr("class", "tv-container")
+      // 初始化 zoom 和 container 层次
+      const zoomG = d3svg.append("g").attr("class", "tv-zoom");
+      container = zoomG.append("g").attr("class", "tv-container")
         .attr("transform", `translate(${margin.left},${margin.top})`);
       container.append("g").attr("class", "tv-links");
       container.append("g").attr("class", "tv-nodes");
+
+      // d3-zoom 支持
+      const zoomBehavior = d3.zoom<SVGSVGElement, undefined>()
+        .scaleExtent([0.3, 4])
+        .on("zoom", (event) => {
+          zoomG.attr("transform", event.transform.toString());
+        });
+      d3svg.call(zoomBehavior);
     } else {
       container.attr("transform", `translate(${margin.left},${margin.top})`);
     }

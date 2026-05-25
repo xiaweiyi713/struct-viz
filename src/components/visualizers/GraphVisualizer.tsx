@@ -2,6 +2,8 @@ import { useRef, useEffect } from "react";
 import * as d3 from "d3";
 import type { VisualGraphNode, VisualGraphEdge } from "../../types";
 
+type D3ZoomG = d3.Selection<SVGGElement, undefined, null, undefined>;
+
 interface GraphVisualizerProps {
   nodes: Record<string, VisualGraphNode>;
   edges: Record<string, VisualGraphEdge>;
@@ -41,6 +43,7 @@ export default function GraphVisualizer({
   const simRef = useRef<d3.Simulation<SimNode, SimEdge> | null>(null);
   const simNodesRef = useRef<Map<string, SimNode>>(new Map());
   const prevNodeIdsRef = useRef<Set<string>>(new Set());
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined> | null>(null);
 
   // 清理仿真
   useEffect(() => {
@@ -115,6 +118,15 @@ export default function GraphVisualizer({
     }));
 
     const g = d3svg.append("g");
+
+    // d3-zoom 支持（双指缩放 + 鼠标滚轮）
+    const zoomBehavior = d3.zoom<SVGSVGElement, undefined>()
+      .scaleExtent([0.3, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform.toString());
+      });
+    d3svg.call(zoomBehavior);
+    zoomRef.current = zoomBehavior;
 
     // 边
     const edgeSel = g.append("g").selectAll<SVGGElement, SimEdge>(".ge")

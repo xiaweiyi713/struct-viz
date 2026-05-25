@@ -88,6 +88,30 @@ tree.search(8);
     expect(result.program!.body[4].type).toBe("Comment");
   });
 
+  it("parses floating point number args", () => {
+    const result = parse("fp.encode(6.625);");
+    expect(result.errors).toHaveLength(0);
+    expect(result.program!.body[0]).toEqual({
+      type: "MethodCall",
+      target: "fp",
+      method: "encode",
+      args: [6.625],
+      line: 1,
+    });
+  });
+
+  it("parses negative floating point number args", () => {
+    const result = parse("fp.encode(-12.375);");
+    expect(result.errors).toHaveLength(0);
+    expect(result.program!.body[0]).toEqual({
+      type: "MethodCall",
+      target: "fp",
+      method: "encode",
+      args: [-12.375],
+      line: 1,
+    });
+  });
+
   it("reports error for missing semicolon", () => {
     const result = parse("BST tree");
     expect(result.errors.length).toBeGreaterThan(0);

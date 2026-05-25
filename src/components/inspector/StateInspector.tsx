@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { TraceFrame, RuntimeValue } from "../../types";
 import type { ExamReference } from "../../data/examReferences";
+import ExamQuestion from "./ExamQuestion";
 
 interface StateInspectorProps {
   frame: TraceFrame | null;
@@ -164,7 +165,7 @@ export default function StateInspector({ frame, totalSteps, frames, goToStep, ex
   const currentStep = frame?.step ?? -1;
   const event = frame?.event;
   const snapshot = frame?.snapshot;
-  const [expandedExam, setExpandedExam] = useState<number | null>(null);
+
 
   const eventConfig = event
     ? eventTypeConfig[event.type] ?? {
@@ -395,29 +396,7 @@ export default function StateInspector({ frame, totalSteps, frames, goToStep, ex
           </div>
           <div className="flex flex-col gap-1.5">
             {examRefs.map((ref, i) => (
-              <div key={i} className="rounded-lg bg-indigo-500/5 overflow-hidden">
-                <button
-                  onClick={() => setExpandedExam(expandedExam === i ? null : i)}
-                  className="w-full flex items-center gap-2 text-xs py-2 px-3 text-left hover:bg-indigo-500/10 transition-colors"
-                >
-                  <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold tabular-nums shrink-0">
-                    {ref.year}
-                  </span>
-                  <span className="text-slate-600 dark:text-slate-300 font-medium shrink-0">{ref.question}</span>
-                  <span className="text-slate-400 dark:text-slate-500 truncate flex-1">{ref.topic}</span>
-                  <svg
-                    width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                    className={`shrink-0 text-slate-400 transition-transform duration-200 ${expandedExam === i ? "rotate-180" : ""}`}
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-                {expandedExam === i && ref.content && (
-                  <div className="px-3 pb-3 pt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300 whitespace-pre-line border-t border-indigo-500/10">
-                    {ref.content}
-                  </div>
-                )}
-              </div>
+              <ExamQuestion key={i} data={ref} />
             ))}
           </div>
         </div>

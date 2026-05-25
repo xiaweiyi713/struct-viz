@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
 
+const HomePage = lazy(() => import("./pages/HomePage"));
+const SubjectPage = lazy(() => import("./pages/SubjectPage"));
 const SandboxPage = lazy(() => import("./pages/SandboxPage"));
 
 function LoadingFallback() {
@@ -19,7 +20,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Suspense fallback={<LoadingFallback />}><HomePage /></Suspense>} />
+        <Route path="/subject/:subjectId" element={<Suspense fallback={<LoadingFallback />}><SubjectPage /></Suspense>} />
         <Route
           path="/sandbox"
           element={

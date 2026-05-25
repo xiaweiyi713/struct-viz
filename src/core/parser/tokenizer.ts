@@ -135,12 +135,21 @@ export function tokenize(input: string): Token[] {
           value += input[pos];
           pos++; column++;
         }
+        // 支持小数部分
+        if (pos < input.length && input[pos] === "." && pos + 1 < input.length && /[0-9]/.test(input[pos + 1])) {
+          value += ".";
+          pos++; column++;
+          while (pos < input.length && /[0-9]/.test(input[pos])) {
+            value += input[pos];
+            pos++; column++;
+          }
+        }
         tokens.push({ type: "NUMBER", value, line, column: startCol });
         continue;
       }
     }
 
-    // 数字字面量
+    // 数字字面量（支持浮点数）
     if (/[0-9]/.test(ch)) {
       const startCol = column;
       let value = "";
@@ -148,6 +157,15 @@ export function tokenize(input: string): Token[] {
         value += input[pos];
         pos++;
         column++;
+      }
+      // 支持小数部分
+      if (pos < input.length && input[pos] === "." && pos + 1 < input.length && /[0-9]/.test(input[pos + 1])) {
+        value += ".";
+        pos++; column++;
+        while (pos < input.length && /[0-9]/.test(input[pos])) {
+          value += input[pos];
+          pos++; column++;
+        }
       }
       tokens.push({ type: "NUMBER", value, line, column: startCol });
       continue;

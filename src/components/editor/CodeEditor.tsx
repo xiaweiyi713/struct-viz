@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useSandboxStore } from "../../stores/sandboxStore";
@@ -24,6 +24,14 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
   const decorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
   const { isDark } = useSandboxStore();
+  const [themeTransition, setThemeTransition] = useState(false);
+
+  // 主题切换时短暂淡入淡出
+  useEffect(() => {
+    setThemeTransition(true);
+    const timer = setTimeout(() => setThemeTransition(false), 200);
+    return () => clearTimeout(timer);
+  }, [isDark]);
 
   const handleMount: OnMount = useCallback((ed, monaco) => {
     editorRef.current = ed;
@@ -101,7 +109,10 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
   );
 
   return (
-    <div className="h-full w-full overflow-hidden">
+    <div
+      className="h-full w-full overflow-hidden transition-opacity duration-200"
+      style={{ opacity: themeTransition ? 0.85 : 1 }}
+    >
       <Editor
         height="100%"
         defaultLanguage="structscript"

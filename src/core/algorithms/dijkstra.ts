@@ -163,6 +163,15 @@ export class GraphRuntime implements StructureRuntime {
       case "eulerPath":
         this.doEulerPath(recorder, line);
         break;
+      case "kosaraju":
+        this.doKosaraju(recorder, line);
+        break;
+      case "graphColoring":
+        this.doGraphColoring(recorder, line);
+        break;
+      case "tarjan":
+        this.doTarjan(recorder, line);
+        break;
       default:
         throw new Error(`Graph 不支持方法 "${method}"`);
     }
@@ -1426,6 +1435,353 @@ export class GraphRuntime implements StructureRuntime {
       description: `${isCircuit ? "欧拉回路" : "欧拉路径"}: ${path.join(" -> ")}。经过 ${usedEdges.size} 条边`,
       codeLine: line,
       targets: [],
+    });
+  }
+
+  private doGraphColoring(recorder: TraceRecorder, line: number): void {
+    this.resetState();
+
+    const ids = [...this.nodes.keys()];
+
+    recorder.record({
+      type: "INIT_DISTANCE",
+      title: "图着色：开始贪心着色",
+      description: `按节点顺序遍历，每个节点选择最小可用颜色`,
+      codeLine: line,
+      targets: [],
+    });
+
+    const nodeColors = new Map<string, number>();
+    let maxColor = -1;
+
+    for (const nodeId of ids) {
+      const node = this.nodes.get(nodeId)!;
+      node.status = "visiting";
+
+      const usedColors = new Set<number>();
+      for (const { to } of this.adjacency.get(nodeId)!) {
+        if (nodeColors.has(to)) {
+          usedColors.add(nodeColors.get(to)!);
+        }
+      }
+      for (const edge of this.edges) {
+        if (edge.target === nodeId && nodeColors.has(edge.source)) {
+          usedColors.add(nodeColors.get(edge.source)!);
+        }
+      }
+
+      let color = 0;
+      while (usedColors.has(color)) {
+        color++;
+      }
+
+      nodeColors.set(nodeId, color);
+      node.distance = color;
+      node.label = `${node.label}(色${color})`;
+      if (color > maxColor) maxColor = color;
+
+      const usedColorsArr = [...usedColors].sort((a, b) => a - b);
+
+      recorder.record({
+        type: "VISIT_NODE",
+        title: `图着色：节点 ${nodeId.replace("v", "")} 着色为 ${color}`,
+        description: `邻居使用的颜色: [${usedColorsArr.length > 0 ? usedColorsArr.join(", ") : "无"}]`,
+        codeLine: line,
+        targets: [nodeId],
+      });
+
+      node.status = "final";
+    }
+
+    recorder.record({
+      type: "MARK_FINAL",
+      title: "图着色完成",
+      description: `使用了 ${maxColor + 1} 种颜色`,
+      codeLine: line,
+      targets: [],
+    });
+  }
+
+  private doTarjan(recorder: TraceRecorder, line: number): void {
+    this.resetState();
+
+    const dfn = new Map<string, number>();
+    const low = new Map<string, number>();
+    const stack: string[] = [];
+    const onStack = new Set<string>();
+    let timer = 0;
+    const sccs: string[][] = [];
+
+    for (const id of this.nodes.keys()) {
+      dfn.set(id, -1);
+      low.set(id, -1);
+    }
+
+    const strongConnect = (nodeId: string): void => {
+      const node = this.nodes.get(nodeId)!;
+      dfn.set(nodeId, timer);
+      low.set(nodeId, timer);
+      node.distance = timer;
+      timer++;
+      stack.push(nodeId);
+      onStack.add(nodeId);
+      node.status = "visiting";
+
+      recorder.record({
+        type: "VISIT_NODE",
+        title: `访问节点 ${node.label}`,
+        description: `dfn[${node.label}]=${dfn.get(nodeId)}, low[${node.label}]=${low.get(nodeId)}, 入栈`,
+        codeLine: line,
+        targets: [nodeId],
+      });
+
+      for (const { edgeId, to } of this.adjacency.get(nodeId)!) {
+        const edge = this.edges.find((e) => e.id === edgeId)!;
+        edge.status = "active";
+
+        if (dfn.get(to) === -1) {
+          recorder.record({
+            type: "RELAX_EDGE",
+            title: `探索边 (${node.label}, ${this.nodes.get(to)!.label})`,
+            description: `节点 ${this.nodes.get(to)!.label} 未访问，递归`,
+            codeLine: line,
+            targets: [edgeId],
+          });
+
+          strongConnect(to);
+
+          const newLow = Math.min(low.get(nodeId)!, low.get(to)!);
+          if (newLow !== low.get(nodeId)) {
+            low.set(nodeId, newLow);
+            node.distance = newLow;
+            recorder.record({
+              type: "UPDATE_DISTANCE",
+              title: `更新 low[${node.label}] = ${newLow}`,
+              description: `子节点 ${this.nodes.get(to)!.label} 回溯后，low[${node.label}] = min(${low.get(nodeId)!}, low[${this.nodes.get(to)!.label}]) = ${newLow}`,
+              codeLine: line,
+              targets: [nodeId],
+            });
+          }
+        } else if (onStack.has(to)) {
+          const newLow = Math.min(low.get(nodeId)!, dfn.get(to)!);
+          if (newLow !== low.get(nodeId)) {
+            low.set(nodeId, newLow);
+            node.distance = newLow;
+            recorder.record({
+              type: "UPDATE_DISTANCE",
+              title: `更新 low[${node.label}] = ${newLow}`,
+              description: `节点 ${this.nodes.get(to)!.label} 在栈中，low[${node.label}] = min(${low.get(nodeId)!}, dfn[${this.nodes.get(to)!.label}]) = ${newLow}`,
+              codeLine: line,
+              targets: [nodeId],
+            });
+          }
+        }
+
+        edge.status = "normal";
+      }
+
+      if (low.get(nodeId) === dfn.get(nodeId)) {
+        const scc: string[] = [];
+        let popped: string;
+        do {
+          popped = stack.pop()!;
+          onStack.delete(popped);
+          scc.push(popped);
+          this.nodes.get(popped)!.status = "final";
+        } while (popped !== nodeId);
+
+        sccs.push(scc);
+
+        const labels = scc.map((id) => this.nodes.get(id)!.label);
+        recorder.record({
+          type: "VISIT_NODE",
+          title: `找到强连通分量 {${labels.join(", ")}}`,
+          description: `根节点 ${node.label}, dfn=${dfn.get(nodeId)}, low=${low.get(nodeId)}，弹出栈中节点`,
+          codeLine: line,
+          targets: scc,
+        });
+      }
+    };
+
+    for (const [id] of dfn) {
+      if (dfn.get(id) === -1) {
+        strongConnect(id);
+      }
+    }
+
+    for (let i = 0; i < sccs.length; i++) {
+      const scc = sccs[i];
+      for (const nodeId of scc) {
+        this.nodes.get(nodeId)!.label = `${this.nodes.get(nodeId)!.label}(SCC${i + 1})`;
+      }
+    }
+
+    recorder.record({
+      type: "MARK_FINAL",
+      title: "Tarjan 强连通分量",
+      description: `共找到 ${sccs.length} 个强连通分量: ${sccs.map((scc, i) => `SCC${i + 1}={${scc.map((id) => this.nodes.get(id)!.label.replace(`(SCC${i + 1})`, "")).join(", ")}}`).join(", ")}`,
+      codeLine: line,
+      targets: [],
+    });
+  }
+
+  // ── Kosaraju 强连通分量 ──
+
+  private doKosaraju(recorder: TraceRecorder, line: number): void {
+    this.resetState();
+
+    const ids = [...this.nodes.keys()];
+    const visited = new Set<string>();
+    const finishOrder: string[] = [];
+
+    recorder.record({
+      type: "VISIT_NODE",
+      title: "Kosaraju：第一遍 DFS（收集完成序）",
+      description: "在原图上做 DFS，按完成时间从早到晚收集节点的逆后序",
+      codeLine: line,
+      targets: [],
+    });
+
+    const dfs1 = (nodeId: string) => {
+      visited.add(nodeId);
+      const node = this.nodes.get(nodeId)!;
+      node.status = "visiting";
+
+      recorder.record({
+        type: "VISIT_NODE",
+        title: "Kosaraju：第一遍 DFS",
+        description: `访问节点 ${node.label}，递归探索其邻居`,
+        codeLine: line,
+        targets: [nodeId],
+      });
+
+      for (const { edgeId, to } of this.adjacency.get(nodeId)!) {
+        if (!visited.has(to)) {
+          const edge = this.edges.find((e) => e.id === edgeId)!;
+          edge.status = "active";
+
+          recorder.record({
+            type: "RELAX_EDGE",
+            title: `Kosaraju：第一遍 DFS，探索边 ${node.label} -> ${this.nodes.get(to)!.label}`,
+            description: `沿边进入未访问节点 ${this.nodes.get(to)!.label}`,
+            codeLine: line,
+            targets: [edgeId, to],
+          });
+
+          edge.status = "normal";
+          dfs1(to);
+        }
+      }
+
+      node.status = "visited";
+      finishOrder.push(nodeId);
+
+      recorder.record({
+        type: "POP",
+        title: `Kosaraju：节点 ${node.label} 完成，加入逆后序`,
+        description: `当前逆后序长度: ${finishOrder.length}`,
+        codeLine: line,
+        targets: [nodeId],
+      });
+    };
+
+    for (const id of ids) {
+      if (!visited.has(id)) {
+        dfs1(id);
+      }
+    }
+
+    const transposedAdj = new Map<string, Array<{ edgeId: string; to: string }>>();
+    for (const id of ids) {
+      transposedAdj.set(id, []);
+    }
+    for (const edge of this.edges) {
+      transposedAdj.get(edge.target)!.push({ edgeId: edge.id, to: edge.source });
+    }
+
+    recorder.record({
+      type: "VISIT_NODE",
+      title: "Kosaraju：构建转置图",
+      description: "反转所有边的方向，准备在转置图上按逆后序做 DFS",
+      codeLine: line,
+      targets: [],
+    });
+
+    for (const node of this.nodes.values()) {
+      node.status = "unvisited";
+    }
+
+    const visited2 = new Set<string>();
+    let sccCount = 0;
+    const sccs: string[][] = [];
+
+    for (let i = finishOrder.length - 1; i >= 0; i--) {
+      const startId = finishOrder[i];
+      if (visited2.has(startId)) continue;
+
+      sccCount++;
+      const component: string[] = [];
+
+      const stack = [startId];
+      while (stack.length > 0) {
+        const nodeId = stack.pop()!;
+        if (visited2.has(nodeId)) continue;
+        visited2.add(nodeId);
+
+        const node = this.nodes.get(nodeId)!;
+        node.status = "visiting";
+        node.distance = sccCount - 1;
+        component.push(node.label);
+
+        recorder.record({
+          type: "VISIT_NODE",
+          title: "Kosaraju：转置图 DFS",
+          description: `SCC ${sccCount}: 访问节点 ${node.label}`,
+          codeLine: line,
+          targets: [nodeId],
+        });
+
+        for (const { edgeId, to } of transposedAdj.get(nodeId)!) {
+          if (!visited2.has(to)) {
+            const edge = this.edges.find((e) => e.id === edgeId)!;
+            edge.status = "active";
+
+            recorder.record({
+              type: "RELAX_EDGE",
+              title: `Kosaraju：转置图 DFS，探索反向边 ${node.label} <- ${this.nodes.get(to)!.label}`,
+              description: `SCC ${sccCount}: 沿反向边进入节点 ${this.nodes.get(to)!.label}`,
+              codeLine: line,
+              targets: [edgeId, to],
+            });
+
+            edge.status = "relaxed";
+            stack.push(to);
+          }
+        }
+
+        node.status = "final";
+      }
+
+      sccs.push(component);
+
+      recorder.record({
+        type: "MARK_FINAL",
+        title: `Kosaraju：找到 SCC ${sccCount}`,
+        description: `SCC ${sccCount} 包含节点: [${component.join(", ")}]`,
+        codeLine: line,
+        targets: component.map((label) =>
+          [...this.nodes.entries()].find(([, n]) => n.label === label)![0],
+        ),
+      });
+    }
+
+    recorder.record({
+      type: "MARK_FINAL",
+      title: "Kosaraju 强连通分量",
+      description: `共找到 ${sccCount} 个强连通分量: ${sccs.map((c, i) => `SCC${i + 1}=[${c.join(",")}]`).join("; ")}`,
+      codeLine: line,
+      targets: [],
+      payload: { sccCount, sccs },
     });
   }
 }

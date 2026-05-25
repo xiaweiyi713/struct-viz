@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSandboxStore } from "../stores/sandboxStore";
+import { useHomeStore } from "../stores/homeStore";
 import TopNav from "../components/layout/TopNav";
 import ResizableLayout from "../components/layout/ResizableLayout";
 import MobileTabLayout from "../components/layout/MobileTabLayout";
@@ -261,6 +262,8 @@ export default function SandboxPage() {
   }, []);
 
   // 从 URL 参数加载模板
+  const { addRecent } = useHomeStore();
+
   useEffect(() => {
     const templateId = searchParams.get("template");
     if (templateId) {
@@ -271,9 +274,10 @@ export default function SandboxPage() {
         reset();
         setErrors([]);
         setParseErrors([]);
+        addRecent(templateId);
       }
     }
-  }, [searchParams, setCode, setTemplate, reset]);
+  }, [searchParams, setCode, setTemplate, reset, addRecent]);
 
   // 主侧自动播放
   useEffect(() => {

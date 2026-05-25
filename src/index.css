@@ -30,6 +30,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* 暗色模式切换平滑过渡 */
+  html.dark,
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.dark,
+    html {
+      transition: none;
+    }
+  }
 }
 
 /* 可视化器组件依赖的 CSS 变量 */
