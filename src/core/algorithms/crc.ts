@@ -118,8 +118,8 @@ export class CRCRuntime implements StructureRuntime {
       let divisor: string;
       if (remainder[0] === "1") {
         divisor = this.generator;
-        this.stepInfo = `${remainder} XOR ${this.generator}`;
-        remainder = this.xor(remainder, this.generator);
+        this.stepInfo = `${remainder} XOR ${divisor}`;
+        remainder = this.xor(remainder, divisor);
       } else {
         divisor = "0".repeat(genLen);
         this.stepInfo = `${remainder} XOR ${divisor} (首位为0)`;

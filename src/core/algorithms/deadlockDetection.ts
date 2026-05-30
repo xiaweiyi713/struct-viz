@@ -34,7 +34,7 @@ export class DeadlockDetectionRuntime implements StructureRuntime {
           row: i,
           col: j,
           value: this.allocation[i]?.[j] ?? 0,
-          status: this.deadlockedProcesses.has(i) ? ("removed" as const) : ("default" as const),
+          status: this.deadlockedProcesses.has(i) ? ("highlighted" as const) : ("default" as const),
         });
       }
       // Request columns
@@ -44,7 +44,7 @@ export class DeadlockDetectionRuntime implements StructureRuntime {
           row: i,
           col: this.resourceCount + j,
           value: this.request[i]?.[j] ?? 0,
-          status: this.deadlockedProcesses.has(i) ? ("removed" as const) : ("default" as const),
+          status: this.deadlockedProcesses.has(i) ? ("highlighted" as const) : ("default" as const),
         });
       }
     }

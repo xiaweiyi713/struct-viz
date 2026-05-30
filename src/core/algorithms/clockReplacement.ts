@@ -35,7 +35,7 @@ export class ClockReplacementRuntime implements StructureRuntime {
       status: idx === this.pointer ? ("highlighted" as const) : ("default" as const),
     }));
 
-    const pageItems: VisualArrayItem[] = this.pageReferences.map((ref, idx) => ({
+    const pageItems: VisualArrayItem[] = this.pageReferences.map((ref) => ({
       id: this.nextId(),
       value: ref,
       status: ("default" as const),

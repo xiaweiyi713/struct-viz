@@ -21,7 +21,7 @@ export class ProducerConsumerRuntime implements StructureRuntime {
   }
 
   private buildSnapshot(): VisualStructure {
-    const bufferItems: VisualArrayItem[] = this.buffer.map((item, idx) => ({
+    const bufferItems: VisualArrayItem[] = this.buffer.map((item) => ({
       id: this.nextId(),
       value: item !== null ? item : "-",
       status: item !== null ? "active" : ("default" as const),

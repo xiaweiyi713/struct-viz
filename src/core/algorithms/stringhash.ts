@@ -16,7 +16,7 @@ export class StringHashRuntime implements StructureRuntime {
   private power: number[] = [];
   private prefixStatuses: string[] = [];
   private powerStatuses: string[] = [];
-  private queryResults: number[] = [];
+  private queryResults: (number | string)[] = [];
   private queryStatuses: string[] = [];
 
   private makeItems(arr: (number | string)[], statuses: string[], prefix: string): VisualArrayItem[] {

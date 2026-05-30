@@ -207,7 +207,7 @@ export class BTreeRuntime implements StructureRuntime {
     // 标记分裂
     const nodeMeta = this.nodes.get(child.id);
     if (nodeMeta) {
-      (nodeMeta as any)._status = "active";
+      (nodeMeta as { _status?: string })._status = "active";
     }
 
     // 提升中间键
@@ -245,7 +245,7 @@ export class BTreeRuntime implements StructureRuntime {
     // 高亮当前节点
     const nodeMeta = this.nodes.get(nodeId);
     if (nodeMeta) {
-      (nodeMeta as any)._highlightedKeys = [key];
+      (nodeMeta as { _highlightedKeys?: number[] })._highlightedKeys = [key];
     }
 
     recorder.record({
@@ -294,7 +294,7 @@ export class BTreeRuntime implements StructureRuntime {
 
     // 清理高亮
     const meta = this.nodes.get(nodeId);
-    if (meta) delete (meta as any)._highlightedKeys;
+    if (meta) delete (meta as { _highlightedKeys?: number[] })._highlightedKeys;
   }
 
   // ── Delete ──

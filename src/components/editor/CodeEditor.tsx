@@ -26,8 +26,9 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
   const { isDark } = useSandboxStore();
   const [themeTransition, setThemeTransition] = useState(false);
 
-  // 主题切换时短暂淡入淡出
+  // 主题切换时短暂淡入淡出（响应 isDark 外部状态变化触发过渡动画）
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setThemeTransition(true);
     const timer = setTimeout(() => setThemeTransition(false), 200);
     return () => clearTimeout(timer);

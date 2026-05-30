@@ -167,7 +167,7 @@ export class LinkStateRuntime implements StructureRuntime {
     recorder.record({
       type: "CHECK_INVARIANT",
       title: `Dijkstra 从 N${source} 开始`,
-      description: `初始: dist = [${dist.map((d, i) => i === source ? 0 : "∞").join(", ")}]`,
+      description: `初始: dist = [${dist.map((_d, i) => i === source ? 0 : "∞").join(", ")}]`,
       codeLine: line,
     });
 

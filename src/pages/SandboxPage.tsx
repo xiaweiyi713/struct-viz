@@ -19,6 +19,7 @@ import StateInspector from "../components/inspector/StateInspector";
 import PseudocodePanel from "../components/inspector/PseudocodePanel";
 import PlaybackControls from "../components/timeline/PlaybackControls";
 import { getTemplateById, templates } from "../data/templates";
+import { subjects } from "../data/subjects";
 import type { VisualStructure, TraceFrame } from "../types";
 
 function getStructureFromFrame(frame: TraceFrame | null): {
@@ -159,16 +160,6 @@ function useVisualSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-const categoryLabel: Record<string, string> = {
-  linear: "线性结构",
-  tree: "树结构",
-  graph: "图算法",
-  sorting: "排序算法",
-  searching: "查找算法",
-  greedy: "贪心算法",
-  dp: "动态规划",
-};
-
 const difficultyBadge: Record<string, string> = {
   easy: "bg-emerald-500/10 text-emerald-500",
   medium: "bg-amber-500/10 text-amber-500",
@@ -272,6 +263,9 @@ export default function SandboxPage() {
         setTemplate(templateId);
         setCode(template.code);
         reset();
+        // 加载 URL 指定的模板属于响应外部状态（路由参数）的合理副作用，
+        // 这里主动清空上一次运行残留的错误提示。
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setErrors([]);
         setParseErrors([]);
         addRecent(templateId);
@@ -326,7 +320,7 @@ export default function SandboxPage() {
     setIsRunning(false);
     if (result.errors) {
       setErrors(result.errors);
-      setParseErrors(result.parseErrors);
+      setParseErrors(result.parseErrors ?? []);
       return;
     }
     if (result.frames) {
@@ -340,7 +334,7 @@ export default function SandboxPage() {
     const result = await compareWorkerExecute.execute(compareCode);
     if (result.errors) {
       setCompareErrors(result.errors);
-      setCompareParseErrors(result.parseErrors);
+      setCompareParseErrors(result.parseErrors ?? []);
       return;
     }
     if (result.frames) {
@@ -504,26 +498,37 @@ export default function SandboxPage() {
           {compareDropdownOpen && (
             <div className="absolute left-0 top-full mt-1 w-72 rounded-xl z-50 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
               <div className="max-h-80 overflow-y-auto py-1">
-                {(["linear", "tree", "graph", "sorting", "searching", "greedy", "dp"] as const).map((category) => {
-                  const catTemplates = templates.filter((t) => t.category === category);
-                  if (catTemplates.length === 0) return null;
+                {subjects.map((subject) => {
+                  const subjectTemplates = templates.filter((t) => t.subject === subject.id);
+                  if (subjectTemplates.length === 0) return null;
                   return (
-                    <div key={category}>
-                      <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        {categoryLabel[category]}
+                    <div key={subject.id}>
+                      <div className={`px-3 py-2 text-[10px] font-semibold uppercase tracking-wider ${subject.text}`}>
+                        {subject.icon} {subject.name}
                       </div>
-                      {catTemplates.map((t) => (
-                        <button
-                          key={t.id}
-                          className={`w-full text-left px-3 py-2 flex items-center gap-2 text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${compareTemplate === t.id ? "bg-violet-500/5" : ""}`}
-                          onClick={() => handleSelectCompareTemplate(t.id)}
-                        >
-                          <span className="font-medium">{t.name}</span>
-                          <span className={`px-1 py-0.5 rounded text-[9px] font-medium ${difficultyBadge[t.difficulty]}`}>
-                            {t.difficulty === "easy" ? "简" : t.difficulty === "medium" ? "中" : "难"}
-                          </span>
-                        </button>
-                      ))}
+                      {subject.categories.map((cat) => {
+                        const catTemplates = subjectTemplates.filter((t) => t.category === cat.key);
+                        if (catTemplates.length === 0) return null;
+                        return (
+                          <div key={cat.key}>
+                            <div className="px-4 py-1 text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                              {cat.label}
+                            </div>
+                            {catTemplates.map((t) => (
+                              <button
+                                key={t.id}
+                                className={`w-full text-left px-4 py-2 flex items-center gap-2 text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${compareTemplate === t.id ? "bg-violet-500/5" : ""}`}
+                                onClick={() => handleSelectCompareTemplate(t.id)}
+                              >
+                                <span className="font-medium">{t.name}</span>
+                                <span className={`px-1 py-0.5 rounded text-[9px] font-medium ${difficultyBadge[t.difficulty]}`}>
+                                  {t.difficulty === "easy" ? "简" : t.difficulty === "medium" ? "中" : "难"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}

@@ -137,7 +137,7 @@ Union(0, 4)       // 按秩合并`,
     else
       node = node.right
   return NULL`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10 },
   },
 
   "avl-insert": {
@@ -326,7 +326,7 @@ B-Insert-Nonfull(x, key)
   if root has no children and not root.isEnd
     free(root), return NULL
   return root`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10 },
   },
 
   "splay-insert": {
@@ -346,7 +346,7 @@ B-Insert-Nonfull(x, key)
     new_node.left = root
     root.right = NULL
   T.root = new_node`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 14, 13: 16, 14: 18 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 14, 13: 16, 14: 18 },
   },
 
   "splay-delete": {
@@ -436,7 +436,7 @@ B-Insert-Nonfull(x, key)
       if dist[u] + w < dist[v]   // 松弛
         dist[v] = dist[u] + w
         Update Q with new dist[v]`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13 },
   },
 
   "graph-bfs": {
@@ -538,7 +538,7 @@ DFS-Visit(u)
     vl[v] = min(vl[w] - w(v,w))
   // 关键活动: e == l
   Critical path = activities where ve[v] == vl[v]`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 8, 8: 9, 9: 10, 10: 11, 11: 13, 12: 14 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 8, 8: 9, 9: 10, 10: 11, 11: 13, 12: 14 },
   },
 
   "graph-bellman-ford": {
@@ -654,7 +654,7 @@ Merge(A, lo, mid, hi)
         swap(A[j], A[j+1])
         swapped = true
     if not swapped break  // 已有序`,
-    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 7: 7, 8: 8, 9: 9, 10: 10 },
+    pseudocodeLineMap: { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 7, 8: 8, 9: 9, 10: 10 },
   },
 
   "insertionsort": {

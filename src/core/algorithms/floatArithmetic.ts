@@ -101,7 +101,6 @@ export class FloatArithmeticRuntime implements StructureRuntime {
     const fb = this.floatToIEEE754(b);
 
     // 步骤 1：展示操作数
-    const signBits = [parseInt(fa.sign), parseInt(fb.sign)];
     const expA = parseInt(fa.exponent, 2);
     const expB = parseInt(fb.exponent, 2);
     const expBias = 127;

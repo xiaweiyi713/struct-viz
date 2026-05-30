@@ -22,7 +22,6 @@ export class TwosComplementRuntime implements StructureRuntime {
 
   /** 将整数转为指定位数的二进制补码字符串 */
   private toTwosComplement(value: number, bits: number): string {
-    const mask = (1 << bits) - 1;
     const twosComp = ((value % (1 << bits)) + (1 << bits)) % (1 << bits);
     return twosComp.toString(2).padStart(bits, "0");
   }
@@ -104,7 +103,6 @@ export class TwosComplementRuntime implements StructureRuntime {
     // 步骤3：逐位相加（从最低位开始）
     const resultBits: string[] = [];
     let carry = 0;
-    const maxVal = (1 << bits) - 1;
 
     for (let i = bits - 1; i >= 0; i--) {
       const bitA = parseInt(binA[i]);
@@ -132,7 +130,7 @@ export class TwosComplementRuntime implements StructureRuntime {
     });
 
     // 显示完整结果
-    this.arrays[2] = resultItems.map((item, i) => ({ ...item, status: "highlighted" as const }));
+    this.arrays[2] = resultItems.map((item) => ({ ...item, status: "highlighted" as const }));
     recorder.record({
       type: "FILL_CELL",
       title: "加法完成",
@@ -211,7 +209,6 @@ export class TwosComplementRuntime implements StructureRuntime {
     });
 
     // 步骤5：A + (-B)
-    const resultItems: VisualArrayItem[] = [];
     let carry = 0;
     const resultBits: string[] = [];
 

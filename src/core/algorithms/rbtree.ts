@@ -310,7 +310,6 @@ export class RBTreeRuntime implements StructureRuntime {
             });
 
             currentZId = parentId;
-            z = parent;
             this.leftRotate(currentZId, recorder, line);
 
             // 旋转后重新获取引用
@@ -374,7 +373,6 @@ export class RBTreeRuntime implements StructureRuntime {
             });
 
             currentZId = parentId;
-            z = parent;
             this.rightRotate(currentZId, recorder, line);
 
             // 旋转后重新获取引用
@@ -789,7 +787,6 @@ export class RBTreeRuntime implements StructureRuntime {
     }
 
     const z = this.getNode(zId);
-    let yId = zId;
     let yOriginalColor = z.color;
     let xId: string;
 
@@ -824,7 +821,7 @@ export class RBTreeRuntime implements StructureRuntime {
       this.transplant(zId, xId, recorder, line);
     } else {
       // z 有两个子节点：找后继 y（右子树最小值）
-      yId = this.treeMinimum(z.right ?? NIL_ID);
+      const yId = this.treeMinimum(z.right ?? NIL_ID);
       const y = this.getNode(yId);
       yOriginalColor = y.color;
       xId = y.right ?? NIL_ID;

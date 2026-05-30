@@ -131,7 +131,7 @@ export class BoothMultiplyRuntime implements StructureRuntime {
     for (let step = 0; step < bits; step++) {
       const q0 = regQ[regQ.length - 1];
       const pair = q0 + qneg1;
-      let action = "";
+      let action: string;
 
       if (pair === "01") {
         // A = A + M

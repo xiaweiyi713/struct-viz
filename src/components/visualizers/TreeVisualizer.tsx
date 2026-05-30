@@ -94,7 +94,7 @@ export default function TreeVisualizer({
       container.append("g").attr("class", "tv-nodes");
 
       // d3-zoom 支持
-      const zoomBehavior = d3.zoom<SVGSVGElement, undefined>()
+      const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
         .scaleExtent([0.3, 4])
         .on("zoom", (event) => {
           zoomG.attr("transform", event.transform.toString());
@@ -394,13 +394,13 @@ function curvedPath(sx: number, sy: number, tx: number, ty: number): string {
 }
 
 function fillColor(c?: string): string {
-  if (c === "red") return "#dc2626";
-  if (c === "black") return "#334155";
+  if (c === "red") return "var(--rb-red-fill)";
+  if (c === "black") return "var(--rb-black-fill)";
   return "var(--primary)";
 }
 
 function strokeColor(c?: string): string {
-  if (c === "red") return "#fca5a5";
-  if (c === "black") return "#64748b";
+  if (c === "red") return "var(--rb-red-stroke)";
+  if (c === "black") return "var(--rb-black-stroke)";
   return "var(--border)";
 }

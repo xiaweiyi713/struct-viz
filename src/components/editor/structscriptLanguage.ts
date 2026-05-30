@@ -1,4 +1,4 @@
-import type { languages, editor } from "monaco-editor";
+import type { languages, editor, IRange } from "monaco-editor";
 
 // StructScript 支持的类名
 const classNames = [
@@ -100,7 +100,7 @@ export function registerStructScriptLanguage(
     triggerCharacters: [".", " "],
     provideCompletionItems(model, position) {
       const word = model.getWordUntilPosition(position);
-      const range: languages.IRange = {
+      const range: IRange = {
         startLineNumber: position.lineNumber,
         endLineNumber: position.lineNumber,
         startColumn: word.startColumn,

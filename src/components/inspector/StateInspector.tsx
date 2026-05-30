@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import type { TraceFrame, RuntimeValue } from "../../types";
 import type { ExamReference } from "../../data/examReferences";
 import ExamQuestion from "./ExamQuestion";

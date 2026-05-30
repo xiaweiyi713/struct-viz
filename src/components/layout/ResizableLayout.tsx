@@ -24,7 +24,9 @@ export default function ResizableLayout({ panels, children, storageKey }: Resiza
         const parsed = JSON.parse(saved) as number[];
         if (parsed.length === panels.length) return parsed;
       }
-    } catch {}
+    } catch {
+      // 忽略损坏的本地存储数据，回退到默认布局
+    }
     return panels.map((p) => p.defaultPercent);
   };
 

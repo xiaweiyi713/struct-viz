@@ -54,7 +54,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
   }
 
   getVariables(): Record<string, RuntimeValue> {
-    const totalProfit = this.schedule.reduce((sum, jobIdx) => {
+    const totalProfit = this.schedule.reduce<number>((sum, jobIdx) => {
       if (jobIdx !== null) return sum + this.jobs[jobIdx].profit;
       return sum;
     }, 0);

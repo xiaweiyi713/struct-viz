@@ -64,6 +64,10 @@
   --tint-primary: rgba(79, 70, 229, 0.12);
   --tint-success: rgba(16, 185, 129, 0.12);
   --tint-accent: rgba(124, 58, 237, 0.15);
+  --rb-red-fill: #dc2626;
+  --rb-red-stroke: #fca5a5;
+  --rb-black-fill: #334155;
+  --rb-black-stroke: #64748b;
 }
 
 .dark {
@@ -84,6 +88,10 @@
   --tint-primary: rgba(129, 140, 248, 0.18);
   --tint-success: rgba(52, 211, 153, 0.18);
   --tint-accent: rgba(167, 139, 250, 0.18);
+  --rb-red-fill: #dc2626;
+  --rb-red-stroke: #fca5a5;
+  --rb-black-fill: #475569;
+  --rb-black-stroke: #94a3b8;
 }
 
 /* 精致的滚动条 */
@@ -97,12 +105,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: var(--text-muted);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: var(--text-secondary);
 }
 
 /* Range Input 自定义样式 */
@@ -124,8 +132,8 @@ input[type="range"]::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #6366f1;
-  border: 2px solid white;
+  background: var(--primary);
+  border: 2px solid var(--surface);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   margin-top: -5px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -145,8 +153,8 @@ input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #6366f1;
-  border: 2px solid white;
+  background: var(--primary);
+  border: 2px solid var(--surface);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: transform 0.15s ease;
 }

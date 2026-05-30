@@ -145,7 +145,7 @@ export class CSMARuntime implements StructureRuntime {
     // 展示每个站点所有退避记录
     const summaryItems: VisualArrayItem[] = [];
     for (let s = 0; s < stations; s++) {
-      summaryItems.push(this.makeItem(`sum-${s}`, stationSlots[s].join("→"), "computed"));
+      summaryItems.push(this.makeItem(`sum-${s}`, stationSlots[s].join("→"), "default"));
     }
     this.arrays.push(summaryItems);
     this.labels.push(`各站点退避历史`);

@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { templates } from "../data/templates";
 import { subjects, type SubjectInfo } from "../data/subjects";
 
-const subjectIcons: Record<string, React.ReactNode> = {
+const Spline = lazy(() => import("@splinetool/react-spline"));
+
+const subjectIcons: Record<string, ReactNode> = {
   "data-structures": (
     <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
       <circle cx="14" cy="6" r="4" fill="currentColor" opacity="0.8"/>
@@ -103,56 +105,82 @@ export default function HomePage() {
         }}
       />
 
-      {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex items-center justify-center pt-16 overflow-hidden">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-indigo-500 blur-[120px] opacity-[0.12] dark:opacity-[0.15] pointer-events-none" />
-        <div className="absolute top-[100px] right-[-100px] w-[400px] h-[400px] rounded-full bg-violet-500 blur-[120px] opacity-[0.08] dark:opacity-[0.12] pointer-events-none" />
+      {/* Hero Section — 全屏首屏 */}
+      <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
+        {/* Spline 3D 背景 */}
+        <div className="absolute inset-0 pointer-events-none">
+          <Suspense fallback={null}>
+            <Spline
+              scene="https://prod.spline.design/BYb29UxQZDo1r9We/scene.splinecode"
+              onLoad={(spline: unknown) => {
+                const app = spline as { _renderer?: { pipeline?: { setWatermark: (t: unknown) => void } } };
+                app._renderer?.pipeline?.setWatermark(null);
+              }}
+            />
+          </Suspense>
+        </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/50 dark:border-indigo-800/50 mb-8">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"/>
-            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">面向 408 考研 · 四科全覆盖</span>
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/20 mb-8">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"/>
+            <span className="text-sm font-medium text-white/90">面向 408 考研 · 四科全覆盖</span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6">
-            <span
-              className="bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-400 bg-clip-text"
-              style={{ WebkitTextFillColor: "transparent" }}
-            >
+            <span className="text-white" style={{ textShadow: "0 4px 24px rgba(99,102,241,0.7), 0 0 60px rgba(99,102,241,0.3)" }}>
               Struct-Viz
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 mb-4 max-w-2xl mx-auto leading-relaxed">
-            把计算机考研核心算法的执行过程<span className="text-slate-900 dark:text-white font-semibold">画出来</span>
+          <p className="text-lg sm:text-xl text-white/80 mb-4 max-w-2xl mx-auto leading-relaxed">
+            把计算机考研核心算法的执行过程<span className="text-white font-semibold">画出来</span>
           </p>
-          <p className="text-base text-slate-400 dark:text-slate-500 mb-10 max-w-xl mx-auto">
+          <p className="text-base text-white/60 mb-10 max-w-xl mx-auto">
             覆盖数据结构、组成原理、操作系统、计算机网络四大科目，逐步动画展示
           </p>
 
-          <div className="flex items-center justify-center gap-8 sm:gap-12 mt-12 text-sm text-slate-400 dark:text-slate-500">
+          {/* 开始实验按钮 */}
+          <button
+            onClick={() => navigate("/sandbox")}
+            className="px-8 py-3.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold text-base hover:bg-white/30 hover:scale-105 active:scale-95 transition-all duration-200 mb-12 cursor-pointer"
+          >
+            开始实验
+          </button>
+
+          <div className="flex items-center justify-center gap-8 sm:gap-12 text-sm text-white/60">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">{templates.length}+</span>
+              <span className="text-2xl font-bold text-white">{templates.length}+</span>
               <span>算法模板</span>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"/>
+            <div className="w-px h-8 bg-white/20"/>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">4</span>
+              <span className="text-2xl font-bold text-white">4</span>
               <span>考试科目</span>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"/>
+            <div className="w-px h-8 bg-white/20"/>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">7</span>
+              <span className="text-2xl font-bold text-white">7</span>
               <span>可视化器</span>
             </div>
           </div>
         </div>
+
+        {/* 向下滚动指引 */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-bounce">
+          <span className="text-xs tracking-widest uppercase text-violet-400">探索更多</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400" stroke="currentColor">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
       </section>
+
+      {/* 过渡渐变：从 3D 场景到普通背景 */}
+      <div className="h-32 bg-gradient-to-b from-transparent to-slate-50 dark:to-slate-950" />
 
       {/* 分隔线 */}
       <div className="max-w-4xl mx-auto h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"/>
 
       {/* 科目卡片 */}
-      <section className="py-24 px-6">
+      <section id="subjects" className="py-24 px-6 scroll-mt-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-sm font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">四大科目</span>

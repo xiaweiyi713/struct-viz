@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { parse } from "../parser/parser";
 import { createRuntime } from "../executor";
-import type { VisualTreeNode, VisualStructure } from "../../types";
+import type { VisualStructure } from "../../types";
 
 /** 辅助：执行代码并返回结果 */
 function exec(code: string) {
@@ -12,13 +12,13 @@ function exec(code: string) {
 }
 
 /** 辅助：获取最终快照中的结构 */
-function getLastStruct<T extends VisualStructure>(
+function getLastStruct<T extends VisualStructure["type"]>(
   execResult: ReturnType<ReturnType<typeof createRuntime>["execute"]>,
-  expectedType: T["type"],
-): Extract<VisualStructure, { type: T["type"] }> {
+  expectedType: T,
+): Extract<VisualStructure, { type: T }> {
   const lastFrame = execResult.frames[execResult.frames.length - 1];
   const structures = lastFrame.snapshot.structures;
-  const struct = Object.values(structures)[0] as Extract<VisualStructure, { type: T["type"] }>;
+  const struct = Object.values(structures)[0] as Extract<VisualStructure, { type: T }>;
   expect(struct.type).toBe(expectedType);
   return struct;
 }

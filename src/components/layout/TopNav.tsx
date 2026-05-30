@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSandboxStore } from "../../stores/sandboxStore";
 import { templates } from "../../data/templates";
+import { subjects } from "../../data/subjects";
 
 const difficultyClasses: Record<string, string> = {
   easy: "bg-emerald-500/10 text-emerald-500",
@@ -13,16 +14,6 @@ const difficultyLabel: Record<string, string> = {
   easy: "简单",
   medium: "中等",
   hard: "困难",
-};
-
-const categoryLabel: Record<string, string> = {
-  linear: "线性结构",
-  tree: "树结构",
-  graph: "图算法",
-  sorting: "排序算法",
-  searching: "查找算法",
-  greedy: "贪心算法",
-  dp: "动态规划",
 };
 
 export default function TopNav() {
@@ -80,8 +71,8 @@ export default function TopNav() {
         {/* 中间区域：首页=锚点导航 / 沙盒页=模板下拉 */}
         {isHome ? (
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <a href="#subjects" className="hover:text-slate-900 dark:hover:text-white transition-colors">科目</a>
             <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">特性</a>
-            <a href="#templates" className="hover:text-slate-900 dark:hover:text-white transition-colors">模板</a>
           </div>
         ) : (
           <div className="relative" ref={dropdownRef}>
@@ -97,41 +88,52 @@ export default function TopNav() {
 
             {dropdownOpen && (
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-96 rounded-xl z-50 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
-                <div className="max-h-96 overflow-y-auto py-1">
-                  {(["linear", "tree", "graph", "sorting", "searching", "greedy", "dp"] as const).map((category) => {
-                    const categoryTemplates = templates.filter((t) => t.category === category);
-                    if (categoryTemplates.length === 0) return null;
+                <div className="max-h-[70vh] overflow-y-auto py-1">
+                  {subjects.map((subject) => {
+                    const subjectTemplates = templates.filter((t) => t.subject === subject.id);
+                    if (subjectTemplates.length === 0) return null;
                     return (
-                      <div key={category}>
-                        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          {categoryLabel[category]}
+                      <div key={subject.id}>
+                        <div className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wider ${subject.text}`}>
+                          {subject.icon} {subject.name}
                         </div>
-                        {categoryTemplates.map((template) => (
-                          <button
-                            key={template.id}
-                            className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedTemplate === template.id ? "bg-slate-50 dark:bg-slate-800/50" : ""}`}
-                            onClick={() => handleSelectTemplate(template.id)}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                                {template.name}
-                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${difficultyClasses[template.difficulty]}`}>
-                                  {difficultyLabel[template.difficulty]}
-                                </span>
+                        {subject.categories.map((cat) => {
+                          const catTemplates = subjectTemplates.filter((t) => t.category === cat.key);
+                          if (catTemplates.length === 0) return null;
+                          return (
+                            <div key={cat.key}>
+                              <div className="px-6 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                {cat.label}
                               </div>
-                              <div className="text-xs mt-1 truncate text-slate-400 dark:text-slate-500">
-                                {template.description}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-0.5 shrink-0 mt-1">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i < template.examFrequency ? "#f59e0b" : "#e2e8f0"}>
-                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
+                              {catTemplates.map((template) => (
+                                <button
+                                  key={template.id}
+                                  className={`w-full text-left px-6 py-3 flex items-start gap-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedTemplate === template.id ? "bg-slate-50 dark:bg-slate-800/50" : ""}`}
+                                  onClick={() => handleSelectTemplate(template.id)}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                                      {template.name}
+                                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${difficultyClasses[template.difficulty]}`}>
+                                        {difficultyLabel[template.difficulty]}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs mt-1 truncate text-slate-400 dark:text-slate-500">
+                                      {template.description}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-0.5 shrink-0 mt-1">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i < template.examFrequency ? "#f59e0b" : "#e2e8f0"}>
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                      </svg>
+                                    ))}
+                                  </div>
+                                </button>
                               ))}
                             </div>
-                          </button>
-                        ))}
+                          );
+                        })}
                       </div>
                     );
                   })}

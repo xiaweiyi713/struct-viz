@@ -97,7 +97,7 @@ export class TCPStateMachineRuntime implements StructureRuntime {
 
   executeMethod(
     method: string,
-    args: Literal[],
+    _args: Literal[],
     recorder: TraceRecorder,
     line: number,
   ): void {
@@ -146,10 +146,10 @@ export class TCPStateMachineRuntime implements StructureRuntime {
     if (!tr) return;
 
     // 清除之前的高亮
-    for (const [id, node] of this.nodeStates) {
+    for (const [, node] of this.nodeStates) {
       node.status = node.status === "final" ? "final" : "unvisited";
     }
-    for (const [id, edge] of this.edgeStates) {
+    for (const [, edge] of this.edgeStates) {
       edge.status = "normal";
     }
 

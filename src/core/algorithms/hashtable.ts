@@ -106,10 +106,6 @@ export class HashTableRuntime implements StructureRuntime {
   }
 
   getVariables(): Record<string, RuntimeValue> {
-    let occupied = 0;
-    for (const b of this.buckets) {
-      if (b.entries.length > 0) occupied++;
-    }
     return {
       tableSize: { type: "number", value: this.tableSize, display: `${this.tableSize}` },
       mode: { type: "string", value: this.mode, display: this.mode === "linear" ? "线性探测" : "链地址法" },

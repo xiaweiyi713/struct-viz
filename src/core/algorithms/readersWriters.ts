@@ -24,7 +24,7 @@ export class ReadersWritersRuntime implements StructureRuntime {
   }
 
   private buildSnapshot(): VisualStructure {
-    const bufferItems: VisualArrayItem[] = this.buffer.map((item, idx) => ({
+    const bufferItems: VisualArrayItem[] = this.buffer.map((item) => ({
       id: this.nextId(),
       value: item !== null ? item : "-",
       status: item !== null ? ("active" as const) : ("default" as const),

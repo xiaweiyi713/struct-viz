@@ -149,16 +149,7 @@ export class PipelineRuntime implements StructureRuntime {
     const stages = this.getStages(stageCount);
     const stageNames = stages;
 
-    // 计算每条指令需要的 stall 周期数
-    // 对于每个 hazard (from → to)，to 指令需要等待 from 的 EX 完成后才能进入 EX
-    // 简化模型：from 的 EX 在 from+stageIdx_of_EX 周期完成，to 的 ID 需要 from 的 EX 结果
-    // 需要 stall 的周期数 = from.EX 周期 - to.ID 周期 的差值
-    const stallCycles: number[] = new Array(instructionCount).fill(0);
     const startCycles: number[] = new Array(instructionCount).fill(0);
-
-    // EX 阶段索引为 2（IF=0, ID=1, EX=2）
-    const exIdx = 2;
-    const idIdx = 1;
 
     // 首先计算不带冒险的起始周期
     for (let i = 0; i < instructionCount; i++) {
