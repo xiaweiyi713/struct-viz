@@ -77,6 +77,7 @@ export default function TreeVisualizer({
     const svg = svgRef.current;
     if (!svg || width <= 0 || height <= 0) return;
 
+    const hasPending = Object.values(nodes).some((n) => n.metadata?.pending === true);
     const margin = { top: 50, right: 40, bottom: 40, left: 40 };
     const innerW = width - margin.left - margin.right;
     const innerH = height - margin.top - margin.bottom;
@@ -116,7 +117,10 @@ export default function TreeVisualizer({
       return;
     }
 
-    const treeLayout = d3.tree<TreeNodeDatum>().size([innerW, innerH]);
+    // 有待命节点时，树布局收窄到左侧，右侧留出待命区（让新节点在树右侧远处待命）
+    const standbyW = hasPending ? Math.min(170, innerW * 0.28) : 0;
+    const treeW = innerW - standbyW;
+    const treeLayout = d3.tree<TreeNodeDatum>().size([treeW, innerH]);
     const hierarchyRoot = d3.hierarchy(root);
     const layout = treeLayout(hierarchyRoot);
 
@@ -226,6 +230,25 @@ export default function TreeVisualizer({
       metadata: d.data.metadata,
     }));
 
+    // ── 待命节点：已创建但尚未接入树（metadata.pending），渲染在树上方的待命区 ──
+    // 接入后 D3 以 id 为 key，会把它从待命区平滑过渡到树中的目标位置（飞入）
+    const standbyNodes = Object.values(nodes).filter(
+      (n) => !dataById.has(n.id) && n.metadata?.pending === true,
+    );
+    standbyNodes.forEach((n, i) => {
+      nodeData.push({
+        id: n.id,
+        key: n.key,
+        color: n.color,
+        // 待命区：树右侧、纵向位于树中部偏上
+        x: treeW + standbyW / 2,
+        y: innerH * 0.38 + i * 64,
+        parentId: null,
+        hl: highlightedNodes.includes(n.id),
+        metadata: n.metadata,
+      });
+    });
+
     const nodeSel = nodesG
       .selectAll<SVGGElement, NodeDatum>(".tv-node")
       .data(nodeData, (d) => d.id);
@@ -298,12 +321,14 @@ function drawCircleNode(g: d3.Selection<SVGGElement, unknown, null, undefined>, 
     .attr("stroke", d.hl ? "var(--warning)" : "transparent")
     .attr("stroke-width", 2.5);
 
-  // Main circle
+  // Main circle（待命节点用虚线描边表示「尚未接入树」）
+  const isPending = d.metadata?.pending === true;
   g.append("circle").attr("class", "main-circle")
     .attr("r", r)
     .attr("fill", fillColor(d.color))
-    .attr("stroke", d.hl ? "var(--warning)" : strokeColor(d.color))
-    .attr("stroke-width", d.hl ? 3.5 : 2.5);
+    .attr("stroke", (d.hl || isPending) ? "var(--warning)" : strokeColor(d.color))
+    .attr("stroke-width", d.hl ? 3.5 : 2.5)
+    .attr("stroke-dasharray", isPending ? "4,3" : "none");
 
   // Label
   const isLeaf = d.metadata?.isLeaf;

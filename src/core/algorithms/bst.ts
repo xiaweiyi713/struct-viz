@@ -15,6 +15,7 @@ interface BSTNode {
   left: string | null;
   right: string | null;
   parent: string | null;
+  pending?: boolean;
 }
 
 // ── BSTRuntime ──
@@ -47,6 +48,7 @@ export class BSTRuntime implements StructureRuntime {
         left: node.left,
         right: node.right,
         parent: node.parent,
+        metadata: node.pending ? { pending: true } : undefined,
       };
     }
     return result;
@@ -146,15 +148,26 @@ export class BSTRuntime implements StructureRuntime {
 
       if (goLeft) {
         if (current.left === null) {
-          // 插入为左子节点
+          // 第一步：新节点待命（已创建，尚未接入树，显示在树上方待命区）
+          newNode.pending = true;
           this.nodes.set(id, newNode);
+          recorder.record({
+            type: "CREATE_NODE",
+            title: `创建新节点 ${key}（待插入）`,
+            description: `找到插入位置：${key} < ${current.key} 且 ${current.key} 左子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
+            codeLine: line,
+            targets: [id],
+            payload: { pending: true },
+          });
+
+          // 第二步：接入为左子节点（从待命区飞入）
+          newNode.pending = false;
           current.left = id;
           newNode.parent = currentId;
-
           recorder.record({
             type: "LINK_NODE",
             title: `${key} 插入为 ${current.key} 的左子节点`,
-            description: `找到插入位置：${key} < ${current.key}，且 ${current.key} 的左子树为空，将 ${key} 挂载为左子节点`,
+            description: `将待命的新节点 ${key} 挂载为 ${current.key} 的左子节点`,
             codeLine: line,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "left" },
@@ -164,15 +177,26 @@ export class BSTRuntime implements StructureRuntime {
         currentId = current.left;
       } else {
         if (current.right === null) {
-          // 插入为右子节点
+          // 第一步：新节点待命（已创建，尚未接入树，显示在树上方待命区）
+          newNode.pending = true;
           this.nodes.set(id, newNode);
+          recorder.record({
+            type: "CREATE_NODE",
+            title: `创建新节点 ${key}（待插入）`,
+            description: `找到插入位置：${key} >= ${current.key} 且 ${current.key} 右子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
+            codeLine: line,
+            targets: [id],
+            payload: { pending: true },
+          });
+
+          // 第二步：接入为右子节点（从待命区飞入）
+          newNode.pending = false;
           current.right = id;
           newNode.parent = currentId;
-
           recorder.record({
             type: "LINK_NODE",
             title: `${key} 插入为 ${current.key} 的右子节点`,
-            description: `找到插入位置：${key} >= ${current.key}，且 ${current.key} 的右子树为空，将 ${key} 挂载为右子节点`,
+            description: `将待命的新节点 ${key} 挂载为 ${current.key} 的右子节点`,
             codeLine: line,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "right" },
