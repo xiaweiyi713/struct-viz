@@ -101,6 +101,7 @@ export class SelectionSortRuntime implements StructureRuntime {
         });
 
         [this.arr[i], this.arr[minIdx]] = [this.arr[minIdx], this.arr[i]];
+        [this.itemIds[i], this.itemIds[minIdx]] = [this.itemIds[minIdx], this.itemIds[i]];
         this.swapCount++;
 
         recorder.record({

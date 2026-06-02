@@ -101,6 +101,8 @@ export class MergeSortRuntime implements StructureRuntime {
   private merge(left: number, mid: number, right: number, recorder: TraceRecorder, line: number): void {
     const leftArr = this.arr.slice(left, mid + 1);
     const rightArr = this.arr.slice(mid + 1, right + 1);
+    const leftIds = this.itemIds.slice(left, mid + 1);
+    const rightIds = this.itemIds.slice(mid + 1, right + 1);
     let i = 0, j = 0, k = left;
 
     // 高亮合并区间
@@ -129,10 +131,12 @@ export class MergeSortRuntime implements StructureRuntime {
 
       if (leftArr[i] <= rightArr[j]) {
         this.arr[k] = leftArr[i];
+        this.itemIds[k] = leftIds[i];
         this.statuses[k] = "highlighted";
         i++;
       } else {
         this.arr[k] = rightArr[j];
+        this.itemIds[k] = rightIds[j];
         this.statuses[k] = "highlighted";
         j++;
       }
@@ -141,6 +145,7 @@ export class MergeSortRuntime implements StructureRuntime {
 
     while (i < leftArr.length) {
       this.arr[k] = leftArr[i];
+      this.itemIds[k] = leftIds[i];
       this.statuses[k] = "highlighted";
       i++;
       k++;
@@ -148,6 +153,7 @@ export class MergeSortRuntime implements StructureRuntime {
 
     while (j < rightArr.length) {
       this.arr[k] = rightArr[j];
+      this.itemIds[k] = rightIds[j];
       this.statuses[k] = "highlighted";
       j++;
       k++;

@@ -204,12 +204,6 @@ export class BTreeRuntime implements StructureRuntime {
     const child = this.nodes.get(parent.children[index])!;
     const sibling = this.createNode(child.isLeaf);
 
-    // 标记分裂
-    const nodeMeta = this.nodes.get(child.id);
-    if (nodeMeta) {
-      (nodeMeta as { _status?: string })._status = "active";
-    }
-
     // 提升中间键
     const promotedKey = child.keys[t - 1];
     parent.keys.splice(index, 0, promotedKey);
@@ -241,12 +235,6 @@ export class BTreeRuntime implements StructureRuntime {
   private insertNonFull(nodeId: string, key: number, recorder: TraceRecorder, line: number): void {
     const node = this.nodes.get(nodeId)!;
     const t = this.t;
-
-    // 高亮当前节点
-    const nodeMeta = this.nodes.get(nodeId);
-    if (nodeMeta) {
-      (nodeMeta as { _highlightedKeys?: number[] })._highlightedKeys = [key];
-    }
 
     recorder.record({
       type: "VISIT_NODE",
@@ -291,10 +279,6 @@ export class BTreeRuntime implements StructureRuntime {
         this.insertNonFull(childId, key, recorder, line);
       }
     }
-
-    // 清理高亮
-    const meta = this.nodes.get(nodeId);
-    if (meta) delete (meta as { _highlightedKeys?: number[] })._highlightedKeys;
   }
 
   // ── Delete ──

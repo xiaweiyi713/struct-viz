@@ -83,6 +83,7 @@ export class ShellSortRuntime implements StructureRuntime {
 
       for (let i = g; i < n; i++) {
         const temp = this.arr[i];
+        const tempId = this.itemIds[i];
         let j = i;
 
         this.statuses[i] = "active";
@@ -101,6 +102,7 @@ export class ShellSortRuntime implements StructureRuntime {
 
           if (this.arr[j - g] > temp) {
             this.arr[j] = this.arr[j - g];
+            this.itemIds[j] = this.itemIds[j - g];
             this.swapCount++;
 
             recorder.record({
@@ -120,6 +122,7 @@ export class ShellSortRuntime implements StructureRuntime {
         }
 
         this.arr[j] = temp;
+        this.itemIds[j] = tempId;
         this.statuses = this.arr.map(() => "default");
       }
 

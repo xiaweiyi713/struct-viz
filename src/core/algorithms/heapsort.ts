@@ -159,5 +159,6 @@ export class HeapSortRuntime implements StructureRuntime {
   private doSwap(a: number, b: number): void {
     [this.arr[a], this.arr[b]] = [this.arr[b], this.arr[a]];
     [this.statuses[a], this.statuses[b]] = [this.statuses[b], this.statuses[a]];
+    [this.itemIds[a], this.itemIds[b]] = [this.itemIds[b], this.itemIds[a]];
   }
 }

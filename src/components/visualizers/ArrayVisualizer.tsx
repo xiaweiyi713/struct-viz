@@ -151,40 +151,94 @@ function ArrayView({
   width: number;
   height: number;
 }) {
-  const itemWidth = Math.min(64, (width - 20) / Math.max(items.length, 1));
-  const itemHeight = Math.min(56, height * 0.35);
-  const startX = (width - items.length * itemWidth) / 2;
-  const centerY = height / 2 - itemHeight / 2;
+  const n = items.length;
+  const colWidth = Math.min(80, (width - 24) / Math.max(n, 1));
+  const innerW = Math.max(14, colWidth - 8);
+
+  // 直方图数值范围（仅对数值生效）
+  const nums = items.map((it) => (typeof it.value === "number" ? it.value : 0));
+  const maxVal = Math.max(...nums, 1);
+  const base = Math.min(0, ...nums);
+
+  const cellH = Math.min(40, Math.max(26, innerW));
+  const labelH = 14;
+  const chartTop = 14;
+  const chartH = Math.max(36, height - cellH - labelH - chartTop - 18);
+
+  const startX = (width - n * colWidth) / 2;
 
   return (
     <div className="relative" style={{ width, height }}>
+      {/* 直方图基线 */}
+      <div
+        className="absolute"
+        style={{
+          left: 8,
+          right: 8,
+          top: chartTop + chartH,
+          height: 1,
+          background: "var(--border)",
+        }}
+      />
+
       <AnimatePresence mode="popLayout">
         {items.map((item, index) => {
           const colors = statusColors[item.status] || statusColors.default;
-          const x = startX + index * itemWidth;
+          const x = startX + index * colWidth;
+          const val = typeof item.value === "number" ? item.value : 0;
+          const ratio = maxVal === base ? 0 : (val - base) / (maxVal - base);
+          const barH = Math.max(4, ratio * chartH * 0.85);
+          const isPlain = item.status === "default";
 
           return (
             <motion.div
               key={item.id}
               layout
-              initial={{ opacity: 0, y: centerY - 20 }}
-              animate={{ opacity: 1, y: centerY }}
-              exit={{ opacity: 0, y: centerY + 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="absolute flex flex-col items-center justify-center rounded-lg font-mono"
-              style={{
-                left: x,
-                width: itemWidth - 4,
-                height: itemHeight,
-                background: colors.bg,
-                border: `2px solid ${colors.border}`,
-                color: colors.text,
-              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+              className="absolute flex flex-col items-center"
+              style={{ left: x, top: chartTop, width: innerW }}
             >
-              <span className="text-base font-semibold">{item.value}</span>
+              {/* 直方图柱（高度随数值，颜色随状态） */}
+              <div
+                className="flex items-end justify-center w-full"
+                style={{ height: chartH }}
+              >
+                <motion.div
+                  layout
+                  className="rounded-t-md"
+                  animate={{ height: barH }}
+                  transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                  style={{
+                    width: innerW,
+                    background: isPlain ? "var(--primary)" : colors.bg,
+                    opacity: isPlain ? 0.4 : 1,
+                    border: `1.5px solid ${isPlain ? "var(--primary)" : colors.border}`,
+                  }}
+                />
+              </div>
+
+              {/* 数字表格格子 */}
+              <div
+                className="rounded-md flex items-center justify-center font-mono font-semibold mt-1.5"
+                style={{
+                  width: innerW,
+                  height: cellH,
+                  background: colors.bg,
+                  border: `2px solid ${colors.border}`,
+                  color: colors.text,
+                  fontSize: innerW < 28 ? 11 : 14,
+                }}
+              >
+                {item.value}
+              </div>
+
+              {/* 下标 */}
               <span
-                className="text-xs mt-0.5"
-                style={{ color: "var(--text-muted)", fontSize: 10 }}
+                className="mt-0.5"
+                style={{ fontSize: 10, color: "var(--text-muted)", height: labelH }}
               >
                 [{index}]
               </span>

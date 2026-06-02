@@ -67,6 +67,7 @@ export class InsertionSortRuntime implements StructureRuntime {
 
     for (let i = 1; i < this.arr.length; i++) {
       const key = this.arr[i];
+      const keyId = this.itemIds[i];
       this.statuses[i] = "active";
 
       recorder.record({
@@ -95,6 +96,7 @@ export class InsertionSortRuntime implements StructureRuntime {
 
         if (shouldShift) {
           this.arr[j + 1] = this.arr[j];
+          this.itemIds[j + 1] = this.itemIds[j];
           this.statuses[j + 1] = this.statuses[j];
           this.statuses[j] = "default";
           this.shiftCount++;
@@ -116,6 +118,7 @@ export class InsertionSortRuntime implements StructureRuntime {
 
       // 插入到正确位置
       this.arr[j + 1] = key;
+      this.itemIds[j + 1] = keyId;
       this.statuses[j + 1] = "highlighted";
 
       recorder.record({

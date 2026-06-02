@@ -85,6 +85,7 @@ export class BubbleSortRuntime implements StructureRuntime {
         if (shouldSwap) {
           [this.arr[j], this.arr[j + 1]] = [this.arr[j + 1], this.arr[j]];
           [this.statuses[j], this.statuses[j + 1]] = [this.statuses[j + 1], this.statuses[j]];
+          [this.itemIds[j], this.itemIds[j + 1]] = [this.itemIds[j + 1], this.itemIds[j]];
           this.swapCount++;
           swapped = true;
 
