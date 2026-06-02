@@ -126,8 +126,11 @@ export default function MatrixVisualizer({
             <motion.div
               key={cell.id}
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              animate={{
+                opacity: 1,
+                scale: cell.status === "active" || cell.status === "highlighted" ? 1.12 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 22 }}
               className="absolute flex items-center justify-center rounded font-mono font-semibold"
               style={{
                 left: x + 1,
@@ -138,6 +141,7 @@ export default function MatrixVisualizer({
                 border: `1.5px solid ${style.border}`,
                 color: style.text,
                 fontSize,
+                zIndex: cell.status === "active" || cell.status === "highlighted" ? 10 : 1,
               }}
             >
               {cell.value}

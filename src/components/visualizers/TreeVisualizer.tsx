@@ -210,6 +210,7 @@ export default function TreeVisualizer({
       color?: string;
       x: number;
       y: number;
+      parentId: string | null;
       hl: boolean;
       metadata?: Record<string, unknown>;
     };
@@ -220,6 +221,7 @@ export default function TreeVisualizer({
       color: d.data.color,
       x: d.x,
       y: d.y,
+      parentId: d.parent ? (d.parent.data as TreeNodeDatum).id : null,
       hl: highlightedNodes.includes(d.data.id),
       metadata: d.data.metadata,
     }));
@@ -236,9 +238,13 @@ export default function TreeVisualizer({
       .remove();
 
     // ── Enter ──
+    // 新节点从「父节点位置」滑出，再飞到自己的最终位置（看清节点从哪长出来）
     const nodeEnter = nodeSel.enter().append("g")
       .attr("class", "tv-node")
-      .attr("transform", (d) => `translate(${d.x},${d.y})`)
+      .attr("transform", (d) => {
+        const p = d.parentId ? posById.get(d.parentId) : null;
+        return p ? `translate(${p.x},${p.y})` : `translate(${d.x},${d.y})`;
+      })
       .attr("opacity", 0);
 
     // ── Enter + Update 合并处理 ──

@@ -100,26 +100,29 @@ export default function StringVisualizer({
         })}
       </AnimatePresence>
 
-      {/* 模式串指针 */}
-      {patternIndex < patternChars.length && matchStart >= 0 && (
-        <div
-          className="absolute flex flex-col items-center"
-          style={{
-            left: startX + (matchStart + patternIndex) * (cellSize + gap) + cellSize / 2,
-            top: patternY - 20,
-          }}
-        >
-          <span className="text-xs font-bold" style={{ color: "var(--success)" }}>j={patternIndex}</span>
-        </div>
-      )}
+      {/* 模式串整体容器：随匹配窗口起点平滑滑动（KMP 失配右移时看清滑了几位） */}
+      <motion.div
+        className="absolute"
+        style={{ left: startX, top: 0 }}
+        animate={{ x: patternOffsetX }}
+        transition={{ type: "spring", stiffness: 200, damping: 26 }}
+      >
+        {/* 模式串指针 j */}
+        {patternIndex < patternChars.length && (
+          <div
+            className="absolute flex flex-col items-center"
+            style={{
+              left: patternIndex * (cellSize + gap) + cellSize / 2,
+              top: patternY - 20,
+            }}
+          >
+            <span className="text-xs font-bold" style={{ color: "var(--success)" }}>j={patternIndex}</span>
+          </div>
+        )}
 
-      {/* 模式串字符行（对齐到匹配位置） */}
-      <AnimatePresence mode="popLayout">
+        {/* 模式串字符行（相对容器定位，容器整体滑动） */}
         {patternChars.map((char, j) => {
           const style = statusStyles[char.status] || statusStyles.default;
-          const x = startX + patternOffsetX + j * (cellSize + gap);
-          if (x < -cellSize || x > width + cellSize) return null;
-
           return (
             <motion.div
               key={char.id}
@@ -127,7 +130,7 @@ export default function StringVisualizer({
               animate={{ opacity: 1, scale: 1 }}
               className="absolute flex flex-col items-center justify-center rounded font-mono text-sm font-bold"
               style={{
-                left: x,
+                left: j * (cellSize + gap),
                 top: patternY,
                 width: cellSize,
                 height: cellSize,
@@ -143,7 +146,7 @@ export default function StringVisualizer({
             </motion.div>
           );
         })}
-      </AnimatePresence>
+      </motion.div>
 
       {/* next 数组 */}
       {nextArray.length > 0 && (

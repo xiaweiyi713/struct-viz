@@ -217,7 +217,14 @@ function updateVisuals(
 ): void {
   const d3svg = d3.select(svg);
 
-  // 更新边
+  // 把 CSS 变量解析为实际颜色值，使 D3 transition 能对颜色做插值（var() 无法插值）
+  const css = getComputedStyle(document.documentElement);
+  const resolve = (v: string): string => {
+    const m = v.match(/var\((--[\w-]+)\)/);
+    return m ? css.getPropertyValue(m[1]).trim() || v : v;
+  };
+
+  // 更新边（颜色 / 线宽平滑过渡）
   const edgeMap = new Map(edges.map((e) => [e.id, e]));
   d3svg.selectAll<SVGGElement, SimEdge>(".ge").each(function () {
     const g = d3.select(this);
@@ -226,25 +233,29 @@ function updateVisuals(
     const edge = edgeMap.get(edgeId);
     if (!edge) return;
     g.select("line")
-      .attr("stroke", edgeStroke(edge.status))
-      .attr("stroke-width", edge.status === "active" ? 3 : edge.status === "relaxed" ? 2.5 : 1.5)
-      .attr("stroke-dasharray", edge.status === "disabled" ? "4,4" : "none");
+      .attr("stroke-dasharray", edge.status === "disabled" ? "4,4" : "none")
+      .transition().duration(350).ease(d3.easeCubicInOut)
+      .attr("stroke", resolve(edgeStroke(edge.status)))
+      .attr("stroke-width", edge.status === "active" ? 3 : edge.status === "relaxed" ? 2.5 : 1.5);
   });
 
-  // 更新节点
+  // 更新节点（状态颜色平滑过渡）
   d3svg.selectAll<SVGGElement, SimNode>(".gn").each(function (d) {
     const g = d3.select(this);
     const nodeData = nodes[d.id];
     if (!nodeData) return;
+    const isHl = highlightedNodes.includes(d.id);
 
     g.select(".main-circle")
-      .attr("fill", statusColors[nodeData.status] || statusColors.unvisited)
-      .attr("stroke", highlightedNodes.includes(d.id) ? "var(--warning)" : "var(--border)")
-      .attr("stroke-width", highlightedNodes.includes(d.id) ? 3 : 1.5);
+      .transition().duration(350).ease(d3.easeCubicInOut)
+      .attr("fill", resolve(statusColors[nodeData.status] || statusColors.unvisited))
+      .attr("stroke", resolve(isHl ? "var(--warning)" : "var(--border)"))
+      .attr("stroke-width", isHl ? 3 : 1.5);
 
     g.select(".hl-ring")
-      .attr("stroke", highlightedNodes.includes(d.id) ? "var(--warning)" : "transparent")
-      .attr("opacity", highlightedNodes.includes(d.id) ? 0.6 : 0);
+      .transition().duration(350)
+      .attr("stroke", resolve(isHl ? "var(--warning)" : "transparent"))
+      .attr("opacity", isHl ? 0.6 : 0);
 
     // 更新距离标签
     const distLabel = g.select(".dist-label");
