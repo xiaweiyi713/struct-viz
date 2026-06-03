@@ -122,6 +122,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `${key} 设为根节点`,
         description: `树为空，将 ${key} 直接设为根节点`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [id],
         payload: { role: "root" },
       });
@@ -142,6 +143,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">="} ${current.key}，${goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -156,6 +158,7 @@ export class BSTRuntime implements StructureRuntime {
             title: `创建新节点 ${key}（待插入）`,
             description: `找到插入位置：${key} < ${current.key} 且 ${current.key} 左子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
             codeLine: line,
+            pseudoLine: 2,
             targets: [id],
             payload: { pending: true },
           });
@@ -169,6 +172,7 @@ export class BSTRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的左子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的左子节点`,
             codeLine: line,
+            pseudoLine: 4,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "left" },
           });
@@ -185,6 +189,7 @@ export class BSTRuntime implements StructureRuntime {
             title: `创建新节点 ${key}（待插入）`,
             description: `找到插入位置：${key} >= ${current.key} 且 ${current.key} 右子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
             codeLine: line,
+            pseudoLine: 2,
             targets: [id],
             payload: { pending: true },
           });
@@ -198,6 +203,7 @@ export class BSTRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的右子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的右子节点`,
             codeLine: line,
+            pseudoLine: 6,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "right" },
           });
@@ -215,6 +221,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `查找 ${key}：树为空`,
         description: "BST 为空，查找失败",
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -230,6 +237,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `访问节点 ${current.key}`,
         description: `正在查找 ${key}，当前节点为 ${current.key}`,
         codeLine: line,
+        pseudoLine: 0,
         targets: [currentId],
       });
 
@@ -239,6 +247,7 @@ export class BSTRuntime implements StructureRuntime {
           title: `找到 ${key}`,
           description: `${key} == ${current.key}，查找成功`,
           codeLine: line,
+          pseudoLine: 2,
           targets: [currentId],
           payload: { found: true },
         });
@@ -252,6 +261,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">"} ${current.key}，${goLeft ? "向左子树查找" : "向右子树查找"}`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -264,6 +274,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `查找 ${key}：未找到`,
       description: `${key} 不在 BST 中，查找失败`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
       payload: { found: false },
     });
