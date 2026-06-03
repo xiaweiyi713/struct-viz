@@ -51,6 +51,7 @@ export class ShellSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -69,6 +70,7 @@ export class ShellSortRuntime implements StructureRuntime {
       title: `增量序列: [${gaps.join(", ")}]`,
       description: `使用 Knuth 增量序列，共 ${gaps.length} 趟`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -78,6 +80,7 @@ export class ShellSortRuntime implements StructureRuntime {
         title: `增量 gap = ${g}`,
         description: `对间隔为 ${g} 的子序列分别进行插入排序`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [],
       });
 
@@ -97,6 +100,7 @@ export class ShellSortRuntime implements StructureRuntime {
             title: `比较 arr[${j}] = ${temp} 和 arr[${j - g}] = ${this.arr[j - g]}`,
             description: `间隔 ${g} 插入排序`,
             codeLine: line,
+            pseudoLine: 7,
             targets: [this.itemIds[j], this.itemIds[j - g]],
           });
 
@@ -110,6 +114,7 @@ export class ShellSortRuntime implements StructureRuntime {
               title: `后移: arr[${j}] = ${this.arr[j - g]}`,
               description: `${this.arr[j - g]} > ${temp}，将较大值后移`,
               codeLine: line,
+              pseudoLine: 8,
               targets: [this.itemIds[j], this.itemIds[j - g]],
             });
 
@@ -131,6 +136,7 @@ export class ShellSortRuntime implements StructureRuntime {
         title: `gap = ${g} 排序完成`,
         description: `当前数组: [${this.arr.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [],
       });
     }
@@ -142,6 +148,7 @@ export class ShellSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `希尔排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，移动: ${this.swapCount} 次`,
       codeLine: line,
+      pseudoLine: 0,
       targets: this.itemIds,
     });
   }

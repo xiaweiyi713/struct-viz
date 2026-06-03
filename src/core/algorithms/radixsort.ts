@@ -62,6 +62,7 @@ export class RadixSortRuntime implements StructureRuntime {
       title: "初始化",
       description: `LSD 基数排序。数组: [${values.join(", ")}]，最大值 ${maxVal}，共 ${maxDigit} 位`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -77,6 +78,7 @@ export class RadixSortRuntime implements StructureRuntime {
         title: `第 ${d + 1} 趟（第 ${d + 1} 位，基数 ${exp}）`,
         description: `按第 ${d + 1} 位（个/十/百...）分配到桶中`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [],
       });
 
@@ -91,6 +93,7 @@ export class RadixSortRuntime implements StructureRuntime {
           title: `${this.arr[i]} → 桶 ${digit}`,
           description: `${this.arr[i]} 的第 ${d + 1} 位是 ${digit}`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [`main-${i}`],
         });
 
@@ -110,6 +113,7 @@ export class RadixSortRuntime implements StructureRuntime {
             title: `从桶 ${b} 取出 ${this.buckets[b][j]}`,
             description: `收集回主数组`,
             codeLine: line,
+            pseudoLine: 3,
             targets: [`b${b}-${j}`],
           });
 
@@ -125,6 +129,7 @@ export class RadixSortRuntime implements StructureRuntime {
         title: `第 ${d + 1} 趟完成`,
         description: `当前数组: [${this.arr.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [],
       });
 
@@ -140,6 +145,7 @@ export class RadixSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `基数排序完成！结果: [${this.arr.join(", ")}]。时间复杂度 O(d(n + k))，稳定排序。`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [],
     });
   }

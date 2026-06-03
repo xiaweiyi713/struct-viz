@@ -49,6 +49,7 @@ export class HeapSortRuntime implements StructureRuntime {
     recorder.record({
       type: "VISIT_NODE", title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
+      pseudoLine: 0,
       codeLine: line, targets: [],
     });
 
@@ -58,6 +59,7 @@ export class HeapSortRuntime implements StructureRuntime {
     recorder.record({
       type: "VISIT_NODE", title: "开始建立最大堆",
       description: "从最后一个非叶节点开始，自底向上执行下沉操作，建立最大堆",
+      pseudoLine: 6,
       codeLine: line, targets: [],
     });
 
@@ -68,6 +70,7 @@ export class HeapSortRuntime implements StructureRuntime {
     recorder.record({
       type: "VISIT_NODE", title: "最大堆建立完成",
       description: `堆顶元素为 ${this.arr[0]}（最大值），堆结构: [${this.arr.join(", ")}]`,
+      pseudoLine: 1,
       codeLine: line, targets: [this.itemIds[0]],
     });
 
@@ -80,6 +83,7 @@ export class HeapSortRuntime implements StructureRuntime {
       recorder.record({
         type: "SWAP", title: `交换堆顶 ${this.arr[i]} 到位置 ${i}`,
         description: `将最大值 ${this.arr[i]} 交换到数组末尾位置 ${i}，已排序部分增长`,
+        pseudoLine: 3,
         codeLine: line, targets: [this.itemIds[0], this.itemIds[i]],
       });
 
@@ -90,6 +94,7 @@ export class HeapSortRuntime implements StructureRuntime {
     recorder.record({
       type: "VISIT_NODE", title: "排序完成",
       description: `堆排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，交换: ${this.swapCount} 次`,
+      pseudoLine: 0,
       codeLine: line, targets: this.itemIds,
     });
   }
@@ -112,6 +117,7 @@ export class HeapSortRuntime implements StructureRuntime {
           type: "COMPARE",
           title: `比较子节点 ${this.arr[child]} 和 ${this.arr[child + 1]}`,
           description: `左子 ${this.arr[child]} ${this.arr[child + 1] > this.arr[child] ? "<" : "≥"} 右子 ${this.arr[child + 1]}，选较大者`,
+          pseudoLine: 11,
           codeLine: line,
           targets: [this.itemIds[child], this.itemIds[child + 1]],
         });
@@ -128,6 +134,7 @@ export class HeapSortRuntime implements StructureRuntime {
         type: "COMPARE",
         title: `比较 ${rootVal} 与子节点 ${childVal}`,
         description: `父节点 ${rootVal} ${rootVal >= childVal ? "≥" : "<"} 子节点 ${childVal}${rootVal < childVal ? "，需要下沉" : "，堆性质满足"}`,
+        pseudoLine: 12,
         codeLine: line,
         targets: [this.itemIds[root], this.itemIds[child]],
       });
@@ -144,6 +151,7 @@ export class HeapSortRuntime implements StructureRuntime {
         type: "SWAP",
         title: `下沉: 交换 ${rootVal} 和 ${childVal}`,
         description: `${rootVal} < ${childVal}，将 ${rootVal} 下沉到位置 ${child}`,
+        pseudoLine: 13,
         codeLine: line,
         targets: [this.itemIds[root], this.itemIds[child]],
       });

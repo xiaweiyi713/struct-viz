@@ -39,7 +39,14 @@ export default function PseudocodePanel({ template, frame }: PseudocodePanelProp
 
   const lines = pseudocode.split("\n");
   const codeLine = frame?.event?.codeLine;
-  const activePseudoLine = codeLine != null && lineMap ? lineMap[codeLine] : undefined;
+  const pseudoLine = frame?.event?.pseudoLine;
+  // 优先用算法逐步标注的 pseudoLine（0-based 索引）；否则回退到旧的 codeLine→lineMap 映射
+  const activePseudoLine =
+    pseudoLine != null
+      ? pseudoLine
+      : codeLine != null && lineMap
+        ? lineMap[codeLine]
+        : undefined;
 
   return (
     <div className="h-full overflow-y-auto p-4">

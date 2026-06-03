@@ -60,6 +60,7 @@ export class QuickSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -71,6 +72,7 @@ export class QuickSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `快速排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，交换: ${this.swapCount} 次`,
       codeLine: line,
+      pseudoLine: 13,
       targets: this.itemIds,
     });
   }
@@ -87,6 +89,7 @@ export class QuickSortRuntime implements StructureRuntime {
       title: `处理子数组 [${lo}..${hi}]`,
       description: `对区间 [${lo}, ${hi}] 快速排序，选取基准元素 ${this.arr[hi]}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: this.itemIds.slice(lo, hi + 1),
     });
 
@@ -112,6 +115,7 @@ export class QuickSortRuntime implements StructureRuntime {
       title: `选择基准 pivot = ${pivot}`,
       description: `选取最右元素 ${pivot} 作为基准，开始划分`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [this.itemIds[hi]],
     });
 
@@ -127,6 +131,7 @@ export class QuickSortRuntime implements StructureRuntime {
         title: `比较 ${val} 与 pivot ${pivot}`,
         description: `${val} ${val <= pivot ? "≤" : ">"} ${pivot}${val <= pivot ? "，移入左分区" : ""}`,
         codeLine: line,
+        pseudoLine: 10,
         targets: [this.itemIds[j], this.itemIds[hi]],
       });
 
@@ -140,6 +145,7 @@ export class QuickSortRuntime implements StructureRuntime {
             title: `交换位置 ${i} 和 ${j}`,
             description: `将 ${this.arr[j]} 移到左分区位置 ${i}`,
             codeLine: line,
+            pseudoLine: 11,
             targets: [this.itemIds[i], this.itemIds[j]],
           });
         }
@@ -155,6 +161,7 @@ export class QuickSortRuntime implements StructureRuntime {
       title: `基准 ${pivot} 归位到位置 ${i + 1}`,
       description: `pivot ${pivot} 放到正确位置 ${i + 1}，左侧均 ≤ ${pivot}，右侧均 > ${pivot}`,
       codeLine: line,
+      pseudoLine: 12,
       targets: [this.itemIds[i + 1], this.itemIds[hi]],
     });
 

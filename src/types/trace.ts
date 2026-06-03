@@ -35,6 +35,8 @@ export interface TraceEvent {
   title: string;
   description: string;
   codeLine?: number;
+  /** 当前步骤对应的伪代码行（0-based 索引），用于伪代码面板精确高亮 */
+  pseudoLine?: number;
   targets?: string[];
   payload?: Record<string, unknown>;
 }

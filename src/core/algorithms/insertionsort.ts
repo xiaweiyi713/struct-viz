@@ -51,6 +51,7 @@ export class InsertionSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -62,6 +63,7 @@ export class InsertionSortRuntime implements StructureRuntime {
       title: "初始有序区",
       description: `元素 ${this.arr[0]} 视为已排序区间 [0, 0]`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [this.itemIds[0]],
     });
 
@@ -75,6 +77,7 @@ export class InsertionSortRuntime implements StructureRuntime {
         title: `取出元素 ${key}（位置 ${i}）`,
         description: `有序区: [${this.arr.slice(0, i).join(", ")}]，取出无序区首个元素 ${key}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [this.itemIds[i]],
       });
 
@@ -91,6 +94,7 @@ export class InsertionSortRuntime implements StructureRuntime {
           title: `比较 ${key} 与 ${this.arr[j]}`,
           description: `${this.arr[j]} ${shouldShift ? ">" : "≤"} ${key}${shouldShift ? "，后移" : "，找到插入位置"}`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [this.itemIds[j]],
         });
 
@@ -106,6 +110,7 @@ export class InsertionSortRuntime implements StructureRuntime {
             title: `后移 ${this.arr[j + 1]}`,
             description: `将 ${this.arr[j + 1]} 从位置 ${j} 后移到位置 ${j + 1}`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [this.itemIds[j + 1]],
           });
 
@@ -126,6 +131,7 @@ export class InsertionSortRuntime implements StructureRuntime {
         title: `插入 ${key} 到位置 ${j + 1}`,
         description: `将 ${key} 插入到有序区的位置 ${j + 1}。有序区: [${this.arr.slice(0, i + 1).join(", ")}]`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [this.itemIds[j + 1]],
       });
     }
@@ -135,6 +141,7 @@ export class InsertionSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `插入排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，移动: ${this.shiftCount} 次`,
       codeLine: line,
+      pseudoLine: 0,
       targets: this.itemIds,
     });
   }

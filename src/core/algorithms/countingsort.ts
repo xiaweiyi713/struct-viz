@@ -74,6 +74,7 @@ export class CountingSortRuntime implements StructureRuntime {
       title: "初始化",
       description: `输入数组: [${values.join(", ")}]，值域 [0, ${maxVal}]，计数数组大小 ${k}`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -88,6 +89,7 @@ export class CountingSortRuntime implements StructureRuntime {
         title: `统计 ${values[i]} 的出现次数`,
         description: `input[${i}] = ${values[i]}，count[${values[i]}] = ${this.countArr[values[i]]}`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [`in-${i}`, `cnt-${values[i]}`],
       });
 
@@ -100,6 +102,7 @@ export class CountingSortRuntime implements StructureRuntime {
       title: "计数完成",
       description: `计数数组: [${this.countArr.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 4,
       targets: [],
     });
 
@@ -114,6 +117,7 @@ export class CountingSortRuntime implements StructureRuntime {
         title: `前缀和: count[${i}] += count[${i - 1}]`,
         description: `count[${i}] = ${this.countArr[i]}`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [`cnt-${i}`, `cnt-${i - 1}`],
       });
 
@@ -126,6 +130,7 @@ export class CountingSortRuntime implements StructureRuntime {
       title: "前缀和计算完成",
       description: `累加后: [${this.countArr.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [],
     });
 
@@ -145,6 +150,7 @@ export class CountingSortRuntime implements StructureRuntime {
         title: `放置 ${val} → output[${pos}]`,
         description: `从右向左扫描 input[${i}] = ${val}，count[${val}] - 1 = ${pos}`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [`in-${i}`, `cnt-${val}`, `out-${pos}`],
       });
 
@@ -161,6 +167,7 @@ export class CountingSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `计数排序完成！结果: [${this.outputArr.join(", ")}]。时间复杂度 O(n + k)，稳定排序。`,
       codeLine: line,
+      pseudoLine: 10,
       targets: [],
     });
   }

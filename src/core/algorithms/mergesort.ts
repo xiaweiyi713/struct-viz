@@ -51,6 +51,7 @@ export class MergeSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -66,6 +67,7 @@ export class MergeSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `归并排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，合并: ${this.mergeCount} 次`,
       codeLine: line,
+      pseudoLine: 0,
       targets: this.itemIds,
     });
   }
@@ -85,6 +87,7 @@ export class MergeSortRuntime implements StructureRuntime {
       title: `分割区间 [${left}, ${right}]`,
       description: `区间 [${left}, ${right}]，中点 mid = ${mid}。分为 [${left}, ${mid}] 和 [${mid + 1}, ${right}]`,
       codeLine: line,
+      pseudoLine: 2,
       targets: this.itemIds.slice(left, right + 1),
     });
 
@@ -115,6 +118,7 @@ export class MergeSortRuntime implements StructureRuntime {
       title: `合并 [${left}, ${mid}] 和 [${mid + 1}, ${right}]`,
       description: `左半: [${leftArr.join(", ")}]，右半: [${rightArr.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 7,
       targets: this.itemIds.slice(left, right + 1),
     });
 
@@ -126,6 +130,7 @@ export class MergeSortRuntime implements StructureRuntime {
         title: `比较 ${leftArr[i]} 和 ${rightArr[j]}`,
         description: `${leftArr[i]} ${leftArr[i] <= rightArr[j] ? "≤" : ">"} ${rightArr[j]}，选取较小值`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [this.itemIds[left + i], this.itemIds[mid + 1 + j]],
       });
 
@@ -166,6 +171,7 @@ export class MergeSortRuntime implements StructureRuntime {
       title: `合并完成 [${left}, ${right}]`,
       description: `合并结果: [${this.arr.slice(left, right + 1).join(", ")}]`,
       codeLine: line,
+      pseudoLine: 15,
       targets: this.itemIds.slice(left, right + 1),
     });
 

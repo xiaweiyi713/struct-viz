@@ -51,6 +51,7 @@ export class SelectionSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -65,6 +66,7 @@ export class SelectionSortRuntime implements StructureRuntime {
         title: `第 ${i + 1} 趟选择`,
         description: `在未排序区间 [${i}, ${n - 1}] 中寻找最小元素`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [this.itemIds[i]],
       });
 
@@ -77,6 +79,7 @@ export class SelectionSortRuntime implements StructureRuntime {
           title: `比较 ${this.arr[j]} 和当前最小值 ${this.arr[minIdx]}`,
           description: `arr[${j}] = ${this.arr[j]} ${this.arr[j] < this.arr[minIdx] ? "<" : "≥"} arr[${minIdx}] = ${this.arr[minIdx]}`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemIds[j], this.itemIds[minIdx]],
         });
 
@@ -97,6 +100,7 @@ export class SelectionSortRuntime implements StructureRuntime {
           title: `找到最小值 ${this.arr[minIdx]}，与 arr[${i}] = ${this.arr[i]} 交换`,
           description: `最小元素在位置 ${minIdx}，交换到位置 ${i}`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [this.itemIds[i], this.itemIds[minIdx]],
         });
 
@@ -109,6 +113,7 @@ export class SelectionSortRuntime implements StructureRuntime {
           title: `交换 ${this.arr[minIdx]} 和 ${this.arr[i]}`,
           description: `位置 ${i} 现在是 ${this.arr[i]}`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [this.itemIds[i], this.itemIds[minIdx]],
         });
       } else {
@@ -117,6 +122,7 @@ export class SelectionSortRuntime implements StructureRuntime {
           title: `arr[${i}] = ${this.arr[i]} 已是最小值，无需交换`,
           description: `位置 ${i} 的元素已是未排序区间的最小值`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [this.itemIds[i]],
         });
       }
@@ -129,6 +135,7 @@ export class SelectionSortRuntime implements StructureRuntime {
         title: `第 ${i + 1} 趟完成`,
         description: `${this.arr[i]} 已到达最终位置 ${i}`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [this.itemIds[i]],
       });
     }
@@ -140,6 +147,7 @@ export class SelectionSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `选择排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，交换: ${this.swapCount} 次`,
       codeLine: line,
+      pseudoLine: 0,
       targets: this.itemIds,
     });
   }

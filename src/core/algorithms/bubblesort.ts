@@ -51,6 +51,7 @@ export class BubbleSortRuntime implements StructureRuntime {
       title: "初始化数组",
       description: `待排序数组: [${values.join(", ")}]，共 ${values.length} 个元素`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -64,6 +65,7 @@ export class BubbleSortRuntime implements StructureRuntime {
         title: `第 ${i + 1} 趟冒泡`,
         description: `未排序区间 [0, ${n - 1 - i}]，已排序区间 [${n - i}, ${n - 1}]`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [],
       });
 
@@ -79,6 +81,7 @@ export class BubbleSortRuntime implements StructureRuntime {
           title: `比较 ${this.arr[j]} 和 ${this.arr[j + 1]}`,
           description: `${this.arr[j]} ${shouldSwap ? ">" : "≤"} ${this.arr[j + 1]}${shouldSwap ? "，需要交换" : "，无需交换"}`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemIds[j], this.itemIds[j + 1]],
         });
 
@@ -94,6 +97,7 @@ export class BubbleSortRuntime implements StructureRuntime {
             title: `交换 ${this.arr[j + 1]} 和 ${this.arr[j]}`,
             description: `将较大值 ${this.arr[j + 1]} 向后移动`,
             codeLine: line,
+            pseudoLine: 6,
             targets: [this.itemIds[j], this.itemIds[j + 1]],
           });
         }
@@ -110,6 +114,7 @@ export class BubbleSortRuntime implements StructureRuntime {
         title: `第 ${i + 1} 趟完成`,
         description: `本趟最大值 ${this.arr[n - 1 - i]} 已到达位置 ${n - 1 - i}${!swapped ? "。本趟无交换，已有序" : ""}`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [this.itemIds[n - 1 - i]],
       });
 
@@ -123,6 +128,7 @@ export class BubbleSortRuntime implements StructureRuntime {
       title: "排序完成",
       description: `冒泡排序完成！结果: [${this.arr.join(", ")}]。比较: ${this.comparisons} 次，交换: ${this.swapCount} 次`,
       codeLine: line,
+      pseudoLine: 0,
       targets: this.itemIds,
     });
   }
