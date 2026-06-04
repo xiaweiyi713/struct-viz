@@ -287,6 +287,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `删除 ${key}：树为空`,
         description: "BST 为空，无法删除",
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -303,6 +304,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `正在查找待删除节点 ${key}，当前节点为 ${current.key}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [currentId],
       });
 
@@ -313,6 +315,7 @@ export class BSTRuntime implements StructureRuntime {
           title: `找到待删除节点 ${key}`,
           description: `${key} == ${current.key}，开始执行删除操作`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [currentId],
           payload: { found: true },
         });
@@ -326,6 +329,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `${key} ${goLeft ? "<" : ">"} ${current.key}`,
         description: `${goLeft ? "向左子树查找" : "向右子树查找"}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -339,6 +343,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `删除 ${key}：未找到`,
       description: `${key} 不在 BST 中，无法删除`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
       payload: { found: false },
     });
@@ -357,6 +362,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `${node.key} 是叶子节点`,
         description: `节点 ${node.key} 没有子节点，直接删除`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [nodeId],
       });
 
@@ -368,6 +374,7 @@ export class BSTRuntime implements StructureRuntime {
           title: `断开 ${node.key} 与父节点 ${parent.key} 的连接`,
           description: `将父节点 ${parent.key} 的${parent.left === nodeId ? "左" : "右"}指针置空`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [node.parent, nodeId],
           payload: { direction: parent.left === nodeId ? "left" : "right" },
         });
@@ -381,6 +388,7 @@ export class BSTRuntime implements StructureRuntime {
           title: `${node.key} 是根节点，置空根指针`,
           description: `根节点 ${node.key} 被删除，树变为空`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [nodeId],
           payload: { role: "root" },
         });
@@ -394,6 +402,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `删除叶子节点 ${node.key}`,
         description: `节点 ${node.key} 已从树中移除`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [nodeId],
       });
 
@@ -402,6 +411,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `删除完成`,
         description: `节点 ${node.key} 已成功删除`,
         codeLine: line,
+        pseudoLine: 12,
         targets: [],
       });
       return;
@@ -437,6 +447,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `${node.key} 只有${childDir === "left" ? "左" : "右"}子节点 ${child.key}`,
       description: `节点 ${node.key} 只有一个子节点，用子节点 ${child.key} 替换`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [nodeId, childId],
     });
 
@@ -446,6 +457,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `断开 ${node.key} 与父节点的连接`,
       description: `准备将 ${child.key} 提升到 ${node.key} 的位置`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [nodeId],
     });
 
@@ -466,6 +478,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `${child.key} 替换 ${node.key}`,
       description: `将 ${child.key} 提升到 ${node.key} 的位置${node.parent !== null ? `，连接到父节点 ${this.getNode(node.parent).key}` : "，成为新的根节点"}`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [childId],
       payload: node.parent !== null ? { parentKey: this.getNode(node.parent).key } : { role: "root" },
     });
@@ -477,6 +490,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `删除节点 ${node.key}`,
       description: `节点 ${node.key} 已被子节点 ${child.key} 替换并移除`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [nodeId],
     });
 
@@ -485,6 +499,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `删除完成`,
       description: `节点 ${node.key} 已成功删除，${child.key} 已替换其位置`,
       codeLine: line,
+      pseudoLine: 12,
       targets: [],
     });
   }
@@ -502,6 +517,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `${node.key} 有两个子节点`,
       description: `节点 ${node.key} 同时有左子树和右子树，需要找到后继节点（右子树最小值）来替换`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [nodeId],
     });
 
@@ -514,6 +530,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `进入右子树查找后继`,
       description: `从右子节点 ${successorCandidate.key} 开始，沿左子树向下查找最小值`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [successorId],
     });
 
@@ -526,6 +543,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `访问左子节点 ${this.getNode(successorId).key}`,
         description: `继续沿左子树向下查找最小值`,
         codeLine: line,
+        pseudoLine: 9,
         targets: [successorId],
       });
     }
@@ -537,6 +555,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `找到后继节点 ${successor.key}`,
       description: `后继节点是 ${successor.key}（右子树中的最小值），将用它替换 ${node.key}`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [successorId],
     });
 
@@ -549,6 +568,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `将 ${oldKey} 替换为 ${successor.key}`,
       description: `把后继节点 ${successor.key} 的值复制到待删除节点 ${oldKey} 的位置`,
       codeLine: line,
+      pseudoLine: 10,
       targets: [nodeId],
       payload: { replacedKey: oldKey, newKey: successor.key },
     });
@@ -563,6 +583,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `后继节点 ${successor.key} 是叶子节点`,
         description: `后继节点没有子节点，直接删除`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [successorId],
       });
 
@@ -575,6 +596,7 @@ export class BSTRuntime implements StructureRuntime {
           title: `断开后继节点 ${successor.key} 与父节点 ${succParent.key}`,
           description: `将父节点 ${succParent.key} 的${succParent.left === successorId ? "左" : "右"}指针置空`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [succParentId, successorId],
         });
 
@@ -588,6 +610,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `删除后继节点 ${successor.key}`,
         description: `后继节点 ${successor.key} 已从树中移除`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [successorId],
       });
     } else {
@@ -600,6 +623,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `后继节点 ${successor.key} 有右子节点 ${rightChild.key}`,
         description: `用右子节点 ${rightChild.key} 替换后继节点 ${successor.key}`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [successorId, rightChildId],
       });
 
@@ -618,6 +642,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `${rightChild.key} 替换后继 ${successor.key}`,
         description: `将 ${rightChild.key} 提升到后继节点 ${successor.key} 的位置`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [rightChildId],
       });
 
@@ -627,6 +652,7 @@ export class BSTRuntime implements StructureRuntime {
         title: `删除后继节点 ${successor.key}`,
         description: `后继节点 ${successor.key} 已被替换并移除`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [successorId],
       });
     }
@@ -636,6 +662,7 @@ export class BSTRuntime implements StructureRuntime {
       title: `删除完成`,
       description: `节点 ${oldKey} 已成功删除（由后继 ${successor.key} 替换）`,
       codeLine: line,
+      pseudoLine: 12,
       targets: [],
     });
   }
