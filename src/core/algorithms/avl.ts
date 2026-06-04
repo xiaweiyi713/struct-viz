@@ -17,6 +17,11 @@ interface AVLNode {
   pending?: boolean;
 }
 
+// 旋转/平衡修复在 insert 与 delete 中被复用，但对应各自伪代码的不同行号
+type RotatePseudo = { check: number; llRot: number; lrPre: number; lrPost: number; rrRot: number; rlPre: number; rlPost: number };
+const AVL_INSERT_PL: RotatePseudo = { check: 2, llRot: 4, lrPre: 6, lrPost: 7, rrRot: 9, rlPre: 11, rlPost: 12 };
+const AVL_DELETE_PL: RotatePseudo = { check: 3, llRot: 6, lrPre: 8, lrPost: 9, rrRot: 12, rlPre: 14, rlPost: 15 };
+
 export class AVLTreeRuntime implements StructureRuntime {
   private nodes = new Map<string, AVLNode>();
   private rootId: string | null = null;
@@ -114,7 +119,7 @@ export class AVLTreeRuntime implements StructureRuntime {
 
   // ── 旋转操作 ──
 
-  private leftRotate(xId: string, recorder: TraceRecorder, line: number): void {
+  private leftRotate(xId: string, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const x = this.getNode(xId);
     const yId = x.right!;
     const y = this.getNode(yId);
@@ -144,12 +149,13 @@ export class AVLTreeRuntime implements StructureRuntime {
       title: `对节点 ${x.key} 执行左旋`,
       description: `左旋：将 ${x.key} 的右子节点 ${y.key} 提升为父节点，${x.key} 降为 ${y.key} 的左子节点`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [xId, yId],
       payload: { pivot: xId, direction: "left" },
     });
   }
 
-  private rightRotate(yId: string, recorder: TraceRecorder, line: number): void {
+  private rightRotate(yId: string, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const y = this.getNode(yId);
     const xId = y.left!;
     const x = this.getNode(xId);
@@ -179,6 +185,7 @@ export class AVLTreeRuntime implements StructureRuntime {
       title: `对节点 ${y.key} 执行右旋`,
       description: `右旋：将 ${y.key} 的左子节点 ${x.key} 提升为父节点，${y.key} 降为 ${x.key} 的右子节点`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [yId, xId],
       payload: { pivot: yId, direction: "right" },
     });
@@ -186,7 +193,7 @@ export class AVLTreeRuntime implements StructureRuntime {
 
   // ── 平衡修复 ──
 
-  private rebalance(nodeId: string, recorder: TraceRecorder, line: number): void {
+  private rebalance(nodeId: string, recorder: TraceRecorder, line: number, pl?: RotatePseudo): void {
     let currentId: string | null = nodeId;
 
     while (currentId !== null) {
@@ -200,41 +207,46 @@ export class AVLTreeRuntime implements StructureRuntime {
           title: `节点 ${current.key} 不平衡（BF = ${bf}）`,
           description: `节点 ${current.key} 的平衡因子为 ${bf}（左子树高 ${this.getHeight(current.left)}，右子树高 ${this.getHeight(current.right)}），需要旋转修复`,
           codeLine: line,
+          pseudoLine: pl?.check,
           targets: [currentId],
         });
 
         if (bf > 1) {
           // 左子树高
           const leftId = current.left!;
-          if (this.getBalance(leftId) < 0) {
+          const isLR = this.getBalance(leftId) < 0;
+          if (isLR) {
             // LR 型：先对左子左旋
             recorder.record({
               type: "ROTATE_LEFT",
               title: `LR 型：先对 ${this.getNode(leftId).key} 左旋`,
               description: `LR 型失衡：先对左子节点 ${this.getNode(leftId).key} 左旋，转化为 LL 型`,
               codeLine: line,
+              pseudoLine: pl?.lrPre,
               targets: [leftId],
             });
-            this.leftRotate(leftId, recorder, line);
+            this.leftRotate(leftId, recorder, line, pl?.lrPre);
           }
-          // LL 型：右旋
-          this.rightRotate(currentId, recorder, line);
+          // LL / LR 型：右旋
+          this.rightRotate(currentId, recorder, line, isLR ? pl?.lrPost : pl?.llRot);
         } else {
           // 右子树高
           const rightId = current.right!;
-          if (this.getBalance(rightId) > 0) {
+          const isRL = this.getBalance(rightId) > 0;
+          if (isRL) {
             // RL 型：先对右子右旋
             recorder.record({
               type: "ROTATE_RIGHT",
               title: `RL 型：先对 ${this.getNode(rightId).key} 右旋`,
               description: `RL 型失衡：先对右子节点 ${this.getNode(rightId).key} 右旋，转化为 RR 型`,
               codeLine: line,
+              pseudoLine: pl?.rlPre,
               targets: [rightId],
             });
-            this.rightRotate(rightId, recorder, line);
+            this.rightRotate(rightId, recorder, line, pl?.rlPre);
           }
-          // RR 型：左旋
-          this.leftRotate(currentId, recorder, line);
+          // RR / RL 型：左旋
+          this.leftRotate(currentId, recorder, line, isRL ? pl?.rlPost : pl?.rrRot);
         }
       }
 
@@ -251,6 +263,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `树为空，无法删除 ${key}`,
         description: `当前树为空，不存在节点 ${key}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -269,6 +282,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${key === current.key ? "=" : goLeft ? "<" : ">"} ${current.key}，${key === current.key ? "找到目标节点" : goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
         payload: { direction: key === current.key ? "found" : goLeft ? "left" : "right" },
       });
@@ -286,6 +300,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `未找到节点 ${key}`,
         description: `树中不存在键值为 ${key} 的节点，无需删除`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -306,12 +321,13 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除叶子节点 ${key}`,
         description: `节点 ${key} 为叶子节点，直接移除`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [targetId],
       });
 
       // 从被删节点的父节点开始向上 rebalance
       if (rebalanceStart !== null) {
-        this.rebalance(rebalanceStart, recorder, line);
+        this.rebalance(rebalanceStart, recorder, line, AVL_DELETE_PL);
       }
 
       recorder.record({
@@ -319,6 +335,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除 ${key} 完成`,
         description: `节点 ${key} 已成功删除，AVL 树已恢复平衡`,
         codeLine: line,
+        pseudoLine: 16,
         targets: [],
       });
     } else if (target.left === null || target.right === null) {
@@ -331,6 +348,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `断开节点 ${target.key} 与其子节点 ${child.key}`,
         description: `节点 ${target.key} 只有一个子节点 ${child.key}，准备用子节点替换被删节点`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [targetId, childId],
       });
 
@@ -353,6 +371,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `${child.key} 替换 ${target.key} 的位置`,
         description: `将子节点 ${child.key} 提升到被删节点 ${target.key} 的位置`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [childId],
         payload: { role: target.parent === null ? "root" : "replace" },
       });
@@ -364,12 +383,13 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除节点 ${key}`,
         description: `节点 ${key} 已被其唯一子节点 ${child.key} 替换并删除`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [targetId],
       });
 
       // 从被删节点的原父节点开始向上 rebalance
       if (rebalanceStart !== null) {
-        this.rebalance(rebalanceStart, recorder, line);
+        this.rebalance(rebalanceStart, recorder, line, AVL_DELETE_PL);
       }
 
       recorder.record({
@@ -377,6 +397,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除 ${key} 完成`,
         description: `节点 ${key} 已成功删除，AVL 树已恢复平衡`,
         codeLine: line,
+        pseudoLine: 16,
         targets: [],
       });
     } else {
@@ -388,6 +409,7 @@ export class AVLTreeRuntime implements StructureRuntime {
           title: `寻找后继：访问 ${this.getNode(successorId).key}`,
           description: `在右子树中寻找最小值（中序后继），向左子树移动`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [successorId],
           payload: { direction: "left" },
         });
@@ -400,6 +422,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `找到后继节点 ${successor.key}`,
         description: `节点 ${key} 的中序后继为 ${successor.key}（右子树最小值）`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [successorId],
         payload: { direction: "found" },
       });
@@ -422,6 +445,7 @@ export class AVLTreeRuntime implements StructureRuntime {
           title: `${succChild.key} 替换后继 ${successor.key} 的位置`,
           description: `后继节点 ${successor.key} 有右子节点 ${succChild.key}，将其提升`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [successor.right],
           payload: { role: "replace" },
         });
@@ -435,6 +459,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `用后继 ${successor.key} 替换 ${target.key}`,
         description: `将后继节点 ${successor.key} 放入被删节点 ${target.key} 的位置`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [targetId, successorId],
       });
 
@@ -469,6 +494,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `后继 ${successor.key} 已替换 ${target.key}`,
         description: `${successor.key} 继承了 ${target.key} 的所有连接关系`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [successorId],
         payload: { role: tParent === null ? "root" : "replace" },
       });
@@ -480,6 +506,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除节点 ${key}`,
         description: `节点 ${key} 已被后继 ${successor.key} 替换并删除`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [targetId],
       });
 
@@ -488,7 +515,7 @@ export class AVLTreeRuntime implements StructureRuntime {
 
       // 从 rebalanceStart 开始向上 rebalance
       if (rebalanceStart !== null && this.nodes.has(rebalanceStart)) {
-        this.rebalance(rebalanceStart, recorder, line);
+        this.rebalance(rebalanceStart, recorder, line, AVL_DELETE_PL);
       }
 
       recorder.record({
@@ -496,6 +523,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `删除 ${key} 完成`,
         description: `节点 ${key} 已被后继 ${successor.key} 替换删除，AVL 树已恢复平衡`,
         codeLine: line,
+        pseudoLine: 16,
         targets: [],
       });
     }
@@ -510,6 +538,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：树为空`,
         description: "AVL 树为空，查找失败",
         codeLine: line,
+        pseudoLine: 9,
         targets: [],
       });
       return;
@@ -525,6 +554,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `访问节点 ${current.key}`,
         description: `正在查找 ${key}，当前节点为 ${current.key}`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId],
       });
 
@@ -534,6 +564,7 @@ export class AVLTreeRuntime implements StructureRuntime {
           title: `找到 ${key}`,
           description: `${key} == ${current.key}，查找成功`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [currentId],
           payload: { found: true },
         });
@@ -547,6 +578,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">"} ${current.key}，${goLeft ? "向左子树查找" : "向右子树查找"}`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -559,6 +591,7 @@ export class AVLTreeRuntime implements StructureRuntime {
       title: `查找 ${key}：未找到`,
       description: `${key} 不在 AVL 树中，查找失败`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [],
       payload: { found: false },
     });
@@ -580,6 +613,7 @@ export class AVLTreeRuntime implements StructureRuntime {
       title: `断开 ${node.key} 与父节点 ${parent.key} 的连接`,
       description: `移除 ${parent.key} 到 ${node.key} 的边`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [node.parent!, nodeId],
     });
   }
@@ -605,6 +639,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `${key} 设为根节点`,
         description: `树为空，将 ${key} 直接设为根节点`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [id],
         payload: { role: "root" },
       });
@@ -623,6 +658,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">="} ${current.key}，${goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -637,6 +673,7 @@ export class AVLTreeRuntime implements StructureRuntime {
             title: `创建新节点 ${key}（待插入）`,
             description: `找到插入位置：${key} < ${current.key} 且 ${current.key} 左子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [id],
             payload: { pending: true },
           });
@@ -650,6 +687,7 @@ export class AVLTreeRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的左子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的左子节点`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "left" },
           });
@@ -666,6 +704,7 @@ export class AVLTreeRuntime implements StructureRuntime {
             title: `创建新节点 ${key}（待插入）`,
             description: `找到插入位置：${key} >= ${current.key} 且 ${current.key} 右子树为空。新节点 ${key} 已创建并在一旁待命，下一步接入树`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [id],
             payload: { pending: true },
           });
@@ -679,6 +718,7 @@ export class AVLTreeRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的右子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的右子节点`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "right" },
           });
@@ -689,6 +729,6 @@ export class AVLTreeRuntime implements StructureRuntime {
     }
 
     // 从新节点向上更新高度并重平衡
-    this.rebalance(newNode.parent!, recorder, line);
+    this.rebalance(newNode.parent!, recorder, line, AVL_INSERT_PL);
   }
 }
