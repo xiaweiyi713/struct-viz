@@ -186,6 +186,7 @@ export class SkipListRuntime implements StructureRuntime {
       title: `插入 key = ${key}`,
       description: `随机决定层数为 ${newLevel + 1} 层 (0~${newLevel})`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [this.itemId(this.headerId, 0)],
     });
 
@@ -208,6 +209,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `Level ${lvl}: 比较 ${this.displayKey(currentNode.key)} → ${this.displayKey(nextNode.key)}`,
           description: `${this.displayKey(nextNode.key)} ${nextNode.key < key ? "<" : nextNode.key === key ? "==" : ">"} ${key}`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemId(nextId, lvl)],
         });
 
@@ -230,6 +232,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `Level ${lvl} → Level ${lvl - 1}`,
           description: `在 ${this.displayKey(this.nodes.get(currentId!)!.key)} 处向下移动到 Level ${lvl - 1}`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [this.itemId(currentId!, lvl - 1)],
         });
       }
@@ -246,6 +249,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `key ${key} 已存在`,
           description: `跳表中已有 ${key}，不重复插入`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemId(existingNextId, 0)],
         });
         return;
@@ -276,6 +280,7 @@ export class SkipListRuntime implements StructureRuntime {
         title: `Level ${lvl}: 插入 ${key}`,
         description: `在 ${this.displayKey(this.nodes.get(prevId!)!.key)} 之后插入 ${key}`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [this.itemId(newNodeId, lvl)],
       });
     }
@@ -292,6 +297,7 @@ export class SkipListRuntime implements StructureRuntime {
       title: `插入 ${key} 完成`,
       description: `节点 ${key} 被插入到 Level 0~${newLevel}，共 ${newLevel + 1} 层`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [this.itemId(newNodeId, 0)],
     });
   }
@@ -304,6 +310,7 @@ export class SkipListRuntime implements StructureRuntime {
       title: `查找 key = ${key}`,
       description: `从最高层 Level ${this.maxLevel - 1} 开始搜索`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [this.itemId(this.headerId, this.maxLevel - 1)],
     });
 
@@ -322,6 +329,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `Level ${lvl}: 比较 ${this.displayKey(nextNode.key)} 与 ${key}`,
           description: `${this.displayKey(nextNode.key)} ${nextNode.key < key ? "<" : nextNode.key === key ? "==" : ">"} ${key}`,
           codeLine: line,
+          pseudoLine: 10,
           targets: [this.itemId(nextId, lvl)],
         });
 
@@ -332,6 +340,7 @@ export class SkipListRuntime implements StructureRuntime {
             title: `找到 key = ${key}`,
             description: `在 Level ${lvl} 找到目标节点`,
             codeLine: line,
+            pseudoLine: 13,
             targets: [this.itemId(nextId, lvl)],
           });
           return;
@@ -352,6 +361,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `Level ${lvl} → Level ${lvl - 1}`,
           description: `在 ${this.displayKey(this.nodes.get(currentId!)!.key)} 处向下移动`,
           codeLine: line,
+          pseudoLine: 9,
           targets: [this.itemId(currentId!, lvl - 1)],
         });
       }
@@ -369,6 +379,7 @@ export class SkipListRuntime implements StructureRuntime {
           title: `找到 key = ${key}`,
           description: `在底层 Level 0 找到目标节点`,
           codeLine: line,
+          pseudoLine: 13,
           targets: [this.itemId(bottomNextId, 0)],
         });
         return;
@@ -380,6 +391,7 @@ export class SkipListRuntime implements StructureRuntime {
       title: `未找到 key = ${key}`,
       description: `搜索完所有层，key ${key} 不在跳表中`,
       codeLine: line,
+      pseudoLine: 13,
       targets: [],
     });
   }

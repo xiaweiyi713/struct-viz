@@ -88,6 +88,7 @@ export class TrieRuntime implements StructureRuntime {
       title: "创建 Trie 根节点",
       description: "初始化空的根节点",
       codeLine: line,
+      pseudoLine: 1,
       targets: [id],
     });
   }
@@ -100,6 +101,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `插入 "${word}"`,
       description: `向 Trie 中插入单词 "${word}"`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [this.rootId!],
     });
 
@@ -117,6 +119,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `'${ch}' 已存在，沿已有路径前进`,
           description: `字符 '${ch}' 的节点已存在，无需新建`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [currentId],
         });
       } else {
@@ -136,6 +139,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `创建节点 '${ch}'`,
           description: `字符 '${ch}' 不存在，创建新节点`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [newId],
         });
 
@@ -154,6 +158,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `标记单词 "${word}" 结束`,
       description: `路径终点标记为单词结束节点`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [currentId],
     });
   }
@@ -166,6 +171,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `查找 "${word}"`,
       description: `在 Trie 中查找单词 "${word}"`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [this.rootId!],
     });
 
@@ -181,6 +187,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `未找到 '${ch}'`,
           description: `在位置 ${i} 失配，字符 '${ch}' 不存在`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [currentId],
         });
 
@@ -189,6 +196,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `查找失败: "${word}" 不在 Trie 中`,
           description: `路径在字符 '${ch}' 处断裂`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [],
         });
         return;
@@ -201,6 +209,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `匹配 '${ch}'`,
         description: `字符 '${ch}' 匹配成功`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [currentId],
       });
     }
@@ -212,6 +221,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `查找成功: "${word}" 在 Trie 中`,
         description: `路径完整且终点是单词结束节点`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [currentId],
       });
     } else {
@@ -220,6 +230,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `"${word}" 是某个单词的前缀，但不是完整单词`,
         description: `路径完整但终点未被标记为单词结束`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [currentId],
       });
     }
@@ -233,6 +244,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `删除 "${word}"`,
       description: `从 Trie 中删除单词 "${word}"`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [this.rootId!],
     });
 
@@ -250,6 +262,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `未找到 '${ch}'`,
           description: `在位置 ${i} 失配，字符 '${ch}' 不存在`,
           codeLine: line,
+          pseudoLine: 8,
           targets: [currentId],
         });
 
@@ -258,6 +271,7 @@ export class TrieRuntime implements StructureRuntime {
           title: `删除失败: "${word}" 不在 Trie 中`,
           description: `路径在字符 '${ch}' 处断裂，无法删除`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [],
         });
         return;
@@ -271,6 +285,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `匹配 '${ch}'`,
         description: `字符 '${ch}' 匹配成功`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [currentId],
       });
     }
@@ -284,6 +299,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `删除失败: "${word}" 不是完整单词`,
         description: `路径完整但终点未被标记为单词结束`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [currentId],
       });
       return;
@@ -298,6 +314,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `取消标记 "${word}" 的结束节点`,
       description: `将终点节点的 isEnd 标记为 false`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [currentId],
     });
 
@@ -323,6 +340,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `断开节点 '${node.char}' 的连接`,
         description: `从父节点移除到 '${node.char}' 的边`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [parentId],
       });
 
@@ -334,6 +352,7 @@ export class TrieRuntime implements StructureRuntime {
         title: `删除节点 '${node.char}'`,
         description: `节点 '${node.char}' 无子节点且不是其他单词结尾，安全删除`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [],
       });
 
@@ -345,6 +364,7 @@ export class TrieRuntime implements StructureRuntime {
       title: `删除完成: "${word}"`,
       description: `单词 "${word}" 已从 Trie 中删除`,
       codeLine: line,
+      pseudoLine: 11,
       targets: [],
     });
   }
