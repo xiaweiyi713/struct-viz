@@ -167,7 +167,7 @@ export class SplayTreeRuntime implements StructureRuntime {
   // ── Splay 操作 ──
 
   /** 将节点 splay 到根 */
-  private splay(nodeId: string, recorder: TraceRecorder, line: number): void {
+  private splay(nodeId: string, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const node = this.getNode(nodeId);
 
     recorder.record({
@@ -175,6 +175,7 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `开始 Splay 操作：将节点 ${node.key} 伸展到根`,
       description: `执行 Splay 操作，通过一系列旋转将节点 ${node.key} 移动到树的根节点位置`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [nodeId],
     });
 
@@ -194,6 +195,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `节点 ${current.key} 是根节点 ${parent.key} 的左子节点，执行右旋（Zig）。` +
               `节点 ${current.key} 被提升为新的根节点。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [parentId, nodeId],
           });
           this.rightRotate(parentId, recorder, line);
@@ -206,6 +208,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `节点 ${current.key} 是根节点 ${parent.key} 的右子节点，执行左旋（Zag）。` +
               `节点 ${current.key} 被提升为新的根节点。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [parentId, nodeId],
           });
           this.leftRotate(parentId, recorder, line);
@@ -229,6 +232,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `执行 Zig-Zig：先对祖父节点 ${grandparent.key} 右旋（提升父节点 ${parent.key}），` +
               `再对新祖父节点右旋（提升节点 ${current.key}）。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [grandparentId, parentId, nodeId],
           });
           this.rightRotate(grandparentId, recorder, line);
@@ -243,6 +247,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `执行 Zag-Zag：先对祖父节点 ${grandparent.key} 左旋（提升父节点 ${parent.key}），` +
               `再对新祖父节点左旋（提升节点 ${current.key}）。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [grandparentId, parentId, nodeId],
           });
           this.leftRotate(grandparentId, recorder, line);
@@ -257,6 +262,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `父节点 ${parent.key} 是祖父节点 ${grandparent.key} 的左子节点（异侧）。` +
               `执行 Zig-Zag：先对父节点 ${parent.key} 左旋，再对祖父节点 ${grandparent.key} 右旋。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [grandparentId, parentId, nodeId],
           });
           this.leftRotate(parentId, recorder, line);
@@ -271,6 +277,7 @@ export class SplayTreeRuntime implements StructureRuntime {
               `父节点 ${parent.key} 是祖父节点 ${grandparent.key} 的右子节点（异侧）。` +
               `执行 Zag-Zig：先对父节点 ${parent.key} 右旋，再对祖父节点 ${grandparent.key} 左旋。`,
             codeLine: line,
+            pseudoLine: pseudo,
             targets: [grandparentId, parentId, nodeId],
           });
           this.rightRotate(parentId, recorder, line);
@@ -286,6 +293,7 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `Splay 完成：节点 ${finalNode.key} 已成为根`,
       description: `节点 ${finalNode.key} 已通过旋转操作移动到根节点位置`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [nodeId],
     });
   }
@@ -312,6 +320,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `${key} 设为根节点`,
         description: `树为空，将 ${key} 直接设为根节点`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [id],
         payload: { role: "root" },
       });
@@ -332,6 +341,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">="} ${current.key}，${goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -363,12 +373,13 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `${key} 插入为 ${parent.key} 的${insertDirection === "left" ? "左" : "右"}子节点`,
       description: `找到插入位置：${key} ${insertDirection === "left" ? "<" : ">="} ${parent.key}，将 ${key} 挂载为${insertDirection === "left" ? "左" : "右"}子节点`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [insertParentId!, id],
       payload: { parentKey: parent.key, direction: insertDirection },
     });
 
     // 4. Splay 新插入的节点到根
-    this.splay(id, recorder, line);
+    this.splay(id, recorder, line, 4);
   }
 
   // ── 查找操作 ──
@@ -380,6 +391,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：树为空`,
         description: "Splay 树为空，查找失败",
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -397,6 +409,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `访问节点 ${current.key}`,
         description: `正在查找 ${key}，当前节点为 ${current.key}`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [currentId],
       });
 
@@ -407,12 +420,13 @@ export class SplayTreeRuntime implements StructureRuntime {
           title: `找到 ${key}`,
           description: `${key} == ${current.key}，查找成功`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [currentId],
           payload: { found: true },
         });
 
         // Splay 找到的节点到根
-        this.splay(currentId, recorder, line);
+        this.splay(currentId, recorder, line, 4);
         return;
       }
 
@@ -423,6 +437,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">"} ${current.key}，${goLeft ? "向左子树查找" : "向右子树查找"}`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -436,11 +451,12 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `查找 ${key}：未找到`,
       description: `${key} 不在 Splay 树中，查找失败。将对最后访问的节点执行 Splay 操作`,
       codeLine: line,
+      pseudoLine: 4,
       targets: [lastAccessedId],
       payload: { found: false },
     });
 
-    this.splay(lastAccessedId, recorder, line);
+    this.splay(lastAccessedId, recorder, line, 4);
   }
 
   // ── 删除操作 ──
@@ -452,6 +468,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `删除 ${key}：树为空`,
         description: "Splay 树为空，无法删除",
         codeLine: line,
+        pseudoLine: 2,
         targets: [],
       });
       return;
@@ -471,6 +488,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `正在查找 ${key}，当前节点为 ${current.key}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
       });
 
@@ -490,10 +508,11 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `删除 ${key}：未找到`,
         description: `${key} 不在 Splay 树中，删除失败。将对最后访问的节点执行 Splay 操作`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [lastAccessedId],
       });
 
-      this.splay(lastAccessedId, recorder, line);
+      this.splay(lastAccessedId, recorder, line, 1);
       return;
     }
 
@@ -503,10 +522,11 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `找到 ${key}，准备删除`,
       description: `找到节点 ${key}，先将其 Splay 到根节点再执行删除`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [foundId],
     });
 
-    this.splay(foundId, recorder, line);
+    this.splay(foundId, recorder, line, 1);
 
     // 此时 foundId 一定是根
     const root = this.getNode(foundId);
@@ -516,6 +536,7 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `删除根节点 ${key}`,
       description: `节点 ${key} 已 Splay 到根，开始删除`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [foundId],
     });
 
@@ -532,6 +553,7 @@ export class SplayTreeRuntime implements StructureRuntime {
           title: `右子节点 ${rightChild.key} 成为新根`,
           description: `根节点 ${key} 没有左子树，右子节点 ${rightChild.key} 成为新的根节点`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [root.right],
           payload: { role: "root" },
         });
@@ -544,6 +566,7 @@ export class SplayTreeRuntime implements StructureRuntime {
           title: `树已清空`,
           description: `根节点 ${key} 没有子节点，删除后树为空`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [foundId],
         });
       }
@@ -558,6 +581,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `左子节点 ${leftChild.key} 成为新根`,
         description: `根节点 ${key} 没有右子树，左子节点 ${leftChild.key} 成为新的根节点`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [root.left],
         payload: { role: "root" },
       });
@@ -576,6 +600,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `找左子树最大节点 ${this.getNode(maxLeftId).key}`,
         description: `根节点 ${key} 有两棵子树，在左子树中查找最大节点作为前驱`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [maxLeftId],
       });
 
@@ -585,7 +610,7 @@ export class SplayTreeRuntime implements StructureRuntime {
       this.getNode(leftSubtreeRoot).parent = null;
 
       // splay 左子树的最大节点
-      this.splay(maxLeftId, recorder, line);
+      this.splay(maxLeftId, recorder, line, 6);
 
       // 此时 maxLeftId 已成为左子树的根，且它没有右子节点（因为它原本就是最大节点）
       // c. 将右子树挂为新左子树根的右子节点
@@ -600,6 +625,7 @@ export class SplayTreeRuntime implements StructureRuntime {
         title: `${newRoot.key} 成为新根，挂载右子树`,
         description: `前驱节点 ${newRoot.key} 成为新的根节点，将原右子树挂为其右子树`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [maxLeftId, rightSubtreeRoot],
         payload: { role: "root" },
       });
@@ -613,6 +639,7 @@ export class SplayTreeRuntime implements StructureRuntime {
       title: `删除 ${key} 完成`,
       description: `节点 ${key} 已成功删除，树中共 ${this.nodes.size} 个节点`,
       codeLine: line,
+      pseudoLine: 8,
       targets: this.rootId ? [this.rootId] : [],
     });
   }
