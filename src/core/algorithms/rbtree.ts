@@ -157,7 +157,7 @@ export class RBTreeRuntime implements StructureRuntime {
 
   // ── 旋转操作 ──
 
-  private leftRotate(xId: string, recorder: TraceRecorder, line: number): void {
+  private leftRotate(xId: string, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const x = this.getNode(xId);
     const yId = x.right!;
     const y = this.getNode(yId);
@@ -193,12 +193,13 @@ export class RBTreeRuntime implements StructureRuntime {
         `节点 ${x.key} 降为 ${y.key} 的左子节点。` +
         `${y.key} 原来的左子树转移为 ${x.key} 的右子树。`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [xId, yId],
       payload: { pivot: xId, direction: "left" },
     });
   }
 
-  private rightRotate(yId: string, recorder: TraceRecorder, line: number): void {
+  private rightRotate(yId: string, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const y = this.getNode(yId);
     const xId = y.left!;
     const x = this.getNode(xId);
@@ -234,6 +235,7 @@ export class RBTreeRuntime implements StructureRuntime {
         `节点 ${y.key} 降为 ${x.key} 的右子节点。` +
         `${x.key} 原来的右子树转移为 ${y.key} 的左子树。`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [yId, xId],
       payload: { pivot: yId, direction: "right" },
     });
@@ -262,6 +264,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `节点 ${z.key}（红色）的父节点 ${parent.key} 也是红色，` +
           `违反红黑树性质 4：红色节点不能有红色孩子。需要修复。`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentZId, parentId],
       });
 
@@ -287,6 +290,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `祖父节点 ${grandparent.key} 染为红色。` +
               `然后将 z 上移到祖父节点，继续检查。`,
             codeLine: line,
+            pseudoLine: 6,
             targets: [parentId, uncleId, grandparentId],
             payload: { recolors: [
               { node: parentId, from: "red", to: "black" },
@@ -308,11 +312,12 @@ export class RBTreeRuntime implements StructureRuntime {
                 `叔叔节点为黑色，且节点 ${z.key} 是父节点 ${parent.key} 的右子节点（LR 型）。` +
                 `先对父节点 ${parent.key} 左旋，转化为 Case 3（LL 型）。`,
               codeLine: line,
+              pseudoLine: 12,
               targets: [parentId, currentZId],
             });
 
             currentZId = parentId;
-            this.leftRotate(currentZId, recorder, line);
+            this.leftRotate(currentZId, recorder, line, 14);
 
             // 旋转后重新获取引用
             const newParentId = this.parentOf(currentZId);
@@ -350,6 +355,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `祖父节点 ${grandparent.key} 染为红色。` +
               `然后将 z 上移到祖父节点，继续检查。`,
             codeLine: line,
+            pseudoLine: 18,
             targets: [parentId, uncleId, grandparentId],
             payload: { recolors: [
               { node: parentId, from: "red", to: "black" },
@@ -371,11 +377,12 @@ export class RBTreeRuntime implements StructureRuntime {
                 `叔叔节点为黑色，且节点 ${z.key} 是父节点 ${parent.key} 的左子节点（RL 型）。` +
                 `先对父节点 ${parent.key} 右旋，转化为 Case 3（RR 型）。`,
               codeLine: line,
+              pseudoLine: 18,
               targets: [parentId, currentZId],
             });
 
             currentZId = parentId;
-            this.rightRotate(currentZId, recorder, line);
+            this.rightRotate(currentZId, recorder, line, 18);
 
             // 旋转后重新获取引用
             const newParentId = this.parentOf(currentZId);
@@ -407,6 +414,7 @@ export class RBTreeRuntime implements StructureRuntime {
           description:
             `确保红黑树性质 2：根节点必须为黑色。将根节点 ${root.key} 从红色染为黑色。`,
           codeLine: line,
+          pseudoLine: 19,
           targets: [this.rootId],
           payload: { node: this.rootId, from: oldColor, to: "black" },
         });
@@ -438,6 +446,7 @@ export class RBTreeRuntime implements StructureRuntime {
         `将父节点 ${parent.key} 染为黑色，祖父节点 ${grandparent.key} 染为红色，` +
         `然后对祖父节点 ${grandparent.key} 右旋。修复完成。`,
       codeLine: line,
+      pseudoLine: 15,
       targets: [parentId, grandparentId],
       payload: { recolors: [
         { node: parentId, from: "red", to: "black" },
@@ -445,10 +454,10 @@ export class RBTreeRuntime implements StructureRuntime {
       ] },
     });
 
-    this.rightRotate(grandparentId, recorder, line);
+    this.rightRotate(grandparentId, recorder, line, 17);
 
     // 最后确保根为黑色
-    this.ensureRootBlack(recorder, line);
+    this.ensureRootBlack(recorder, line, 19);
   }
 
   /** Case 3 对称：RR 型 — 父节点染黑，祖父节点染红，对祖父左旋 */
@@ -475,6 +484,7 @@ export class RBTreeRuntime implements StructureRuntime {
         `将父节点 ${parent.key} 染为黑色，祖父节点 ${grandparent.key} 染为红色，` +
         `然后对祖父节点 ${grandparent.key} 左旋。修复完成。`,
       codeLine: line,
+      pseudoLine: 18,
       targets: [parentId, grandparentId],
       payload: { recolors: [
         { node: parentId, from: "red", to: "black" },
@@ -482,14 +492,14 @@ export class RBTreeRuntime implements StructureRuntime {
       ] },
     });
 
-    this.leftRotate(grandparentId, recorder, line);
+    this.leftRotate(grandparentId, recorder, line, 18);
 
     // 最后确保根为黑色
-    this.ensureRootBlack(recorder, line);
+    this.ensureRootBlack(recorder, line, 19);
   }
 
   /** 确保根节点为黑色（修复完成后调用） */
-  private ensureRootBlack(recorder: TraceRecorder, line: number): void {
+  private ensureRootBlack(recorder: TraceRecorder, line: number, pseudo?: number): void {
     if (this.rootId !== null) {
       const root = this.getNode(this.rootId);
       if (root.color === "red") {
@@ -500,6 +510,7 @@ export class RBTreeRuntime implements StructureRuntime {
           description:
             `确保红黑树性质 2：根节点必须为黑色。将根节点 ${root.key} 从红色染为黑色。`,
           codeLine: line,
+          pseudoLine: pseudo,
           targets: [this.rootId],
           payload: { node: this.rootId, from: "red", to: "black" },
         });
@@ -530,6 +541,7 @@ export class RBTreeRuntime implements StructureRuntime {
         title: `${key} 设为根节点`,
         description: `树为空，将 ${key} 直接设为根节点。`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [id],
         payload: { role: "root" },
       });
@@ -542,6 +554,7 @@ export class RBTreeRuntime implements StructureRuntime {
         description:
           `红黑树性质 2：根节点必须为黑色。将根节点 ${key} 从红色染为黑色。`,
         codeLine: line,
+        pseudoLine: 19,
         targets: [id],
         payload: { node: id, from: "red", to: "black" },
       });
@@ -564,6 +577,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `${key} ${goLeft ? "<" : ">="} ${current.key}，` +
           `${goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -580,6 +594,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `找到插入位置：${key} < ${current.key} 且 ${current.key} 左子树为空。` +
               `新节点 ${key}（红色）已创建并在一旁待命，下一步接入树。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [id],
             payload: { pending: true },
           });
@@ -593,6 +608,7 @@ export class RBTreeRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的左子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的左子节点（红色）。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "left" },
           });
@@ -611,6 +627,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `找到插入位置：${key} >= ${current.key} 且 ${current.key} 右子树为空。` +
               `新节点 ${key}（红色）已创建并在一旁待命，下一步接入树。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [id],
             payload: { pending: true },
           });
@@ -624,6 +641,7 @@ export class RBTreeRuntime implements StructureRuntime {
             title: `${key} 插入为 ${current.key} 的右子节点`,
             description: `将待命的新节点 ${key} 挂载为 ${current.key} 的右子节点（红色）。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [currentId, id],
             payload: { parentKey: current.key, direction: "right" },
           });
@@ -646,6 +664,7 @@ export class RBTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：树为空`,
         description: "红黑树为空，查找失败",
         codeLine: line,
+        pseudoLine: 9,
         targets: [],
       });
       return;
@@ -661,6 +680,7 @@ export class RBTreeRuntime implements StructureRuntime {
         title: `访问节点 ${current.key}`,
         description: `正在查找 ${key}，当前节点为 ${current.key}（${current.color}）`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId],
       });
 
@@ -670,6 +690,7 @@ export class RBTreeRuntime implements StructureRuntime {
           title: `找到 ${key}`,
           description: `${key} == ${current.key}，查找成功`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [currentId],
           payload: { found: true },
         });
@@ -683,6 +704,7 @@ export class RBTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${current.key}`,
         description: `${key} ${goLeft ? "<" : ">"} ${current.key}，${goLeft ? "向左子树查找" : "向右子树查找"}`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -695,6 +717,7 @@ export class RBTreeRuntime implements StructureRuntime {
       title: `查找 ${key}：未找到`,
       description: `${key} 不在红黑树中，查找失败`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [],
       payload: { found: false },
     });
@@ -742,6 +765,7 @@ export class RBTreeRuntime implements StructureRuntime {
         title: `查找 ${key}`,
         description: `树为空，无法删除 ${key}。`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -762,6 +786,7 @@ export class RBTreeRuntime implements StructureRuntime {
           title: `比较 ${key} 与 ${current.key}`,
           description: `${key} === ${current.key}，找到目标节点。`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [currentId],
         });
         zId = currentId;
@@ -775,6 +800,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `${key} ${goLeft ? "<" : ">"} ${current.key}，` +
           `${goLeft ? "向左子树移动" : "向右子树移动"}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
         payload: { direction: goLeft ? "left" : "right" },
       });
@@ -786,6 +812,7 @@ export class RBTreeRuntime implements StructureRuntime {
             title: `查找结束`,
             description: `${key} 不在树中，无法删除。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [],
           });
           return;
@@ -798,6 +825,7 @@ export class RBTreeRuntime implements StructureRuntime {
             title: `查找结束`,
             description: `${key} 不在树中，无法删除。`,
             codeLine: line,
+            pseudoLine: 1,
             targets: [],
           });
           return;
@@ -827,6 +855,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `节点 ${z.key}（${z.color}）的左子树为空，` +
           `将用其右子树替换它的位置。`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [zId],
       });
       this.transplant(zId, xId, recorder, line);
@@ -840,6 +869,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `节点 ${z.key}（${z.color}）的右子树为空，` +
           `将用其左子树替换它的位置。`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [zId],
       });
       this.transplant(zId, xId, recorder, line);
@@ -857,6 +887,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `节点 ${z.key} 有两个子节点，在右子树中找到最小值（后继）${y.key}（${y.color}）` +
           `来替代 ${z.key} 的位置。`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [yId],
       });
 
@@ -876,6 +907,7 @@ export class RBTreeRuntime implements StructureRuntime {
             `后继节点 ${y.key} 不是 ${z.key} 的直接子节点，` +
             `先将 ${y.key} 的右子树替换 ${y.key} 的位置。`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [yId],
         });
         this.transplant(yId, xId, recorder, line);
@@ -899,6 +931,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `将后继节点 ${yNode.key} 移到 ${z.key} 的位置，` +
           `继承 ${z.key} 的左右子树和颜色（${z.color}）。`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [yId],
       });
 
@@ -911,6 +944,7 @@ export class RBTreeRuntime implements StructureRuntime {
             `后继节点 ${yNode.key} 从 ${yOriginalColor} 变为 ${z.color}，` +
             `继承被删除节点 ${z.key} 的颜色。`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [yId],
           payload: { recolors: [
             { node: yId, from: yOriginalColor, to: z.color },
@@ -925,6 +959,7 @@ export class RBTreeRuntime implements StructureRuntime {
       title: `删除节点 ${z.key}`,
       description: `节点 ${z.key} 已从树中移除。`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [zId],
       payload: { key: z.key, color: z.color },
     });
@@ -939,6 +974,7 @@ export class RBTreeRuntime implements StructureRuntime {
           `实际被移除的节点（后继）原色为黑色，删除可能导致黑高不平衡。` +
           `需要对替换节点执行 deleteFixup 修复。`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [xId],
       });
       this.deleteFixup(xId, recorder, line);
@@ -949,6 +985,7 @@ export class RBTreeRuntime implements StructureRuntime {
       title: `删除 ${key} 完成`,
       description: `红黑树删除操作完成，树性质已恢复。`,
       codeLine: line,
+      pseudoLine: 12,
       targets: [],
     });
   }
@@ -994,6 +1031,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${w.key} 染为黑色，父节点 ${xParent.key} 染为红色，` +
               `然后对父节点 ${xParent.key} 左旋。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "black" },
@@ -1001,7 +1039,7 @@ export class RBTreeRuntime implements StructureRuntime {
             ] },
           });
 
-          this.leftRotate(xParentId, recorder, line);
+          this.leftRotate(xParentId, recorder, line, 11);
 
           // 更新兄弟
           wId = xParent.right ?? NIL_ID;
@@ -1026,6 +1064,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${this.isNilNode(wId) ? "NIL" : w.key} 染为红色，` +
               `然后将 x 上移到父节点 ${xParent.key}。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "red" },
@@ -1056,6 +1095,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${w.key} 染为红色，兄弟的左子 ${wLeftNode ? wLeftNode.key : "NIL"} 染为黑色，` +
               `然后对兄弟 ${w.key} 右旋，转化为 Case 4。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, wLeft],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "red" },
@@ -1063,7 +1103,7 @@ export class RBTreeRuntime implements StructureRuntime {
             ] },
           });
 
-          this.rightRotate(wId, recorder, line);
+          this.rightRotate(wId, recorder, line, 11);
 
           // 更新兄弟
           wId = xParent.right ?? NIL_ID;
@@ -1100,11 +1140,12 @@ export class RBTreeRuntime implements StructureRuntime {
               `父节点 ${xParent.key} 染为黑色，兄弟的右子节点染为黑色，` +
               `然后对父节点 ${xParent.key} 左旋。修复完成。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId, wRightUpdated],
             payload: { recolors },
           });
 
-          this.leftRotate(xParentId, recorder, line);
+          this.leftRotate(xParentId, recorder, line, 11);
         }
 
         // Case 4 后直接退出
@@ -1130,6 +1171,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${w.key} 染为黑色，父节点 ${xParent.key} 染为红色，` +
               `然后对父节点 ${xParent.key} 右旋。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "black" },
@@ -1137,7 +1179,7 @@ export class RBTreeRuntime implements StructureRuntime {
             ] },
           });
 
-          this.rightRotate(xParentId, recorder, line);
+          this.rightRotate(xParentId, recorder, line, 11);
 
           // 更新兄弟
           wId = xParent.left ?? NIL_ID;
@@ -1162,6 +1204,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${this.isNilNode(wId) ? "NIL" : w.key} 染为红色，` +
               `然后将 x 上移到父节点 ${xParent.key}。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "red" },
@@ -1192,6 +1235,7 @@ export class RBTreeRuntime implements StructureRuntime {
               `将兄弟 ${w.key} 染为红色，兄弟的右子 ${wRightNode ? wRightNode.key : "NIL"} 染为黑色，` +
               `然后对兄弟 ${w.key} 左旋，转化为 Case 4。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, wRight],
             payload: { recolors: [
               { node: wId, from: oldWColor, to: "red" },
@@ -1199,7 +1243,7 @@ export class RBTreeRuntime implements StructureRuntime {
             ] },
           });
 
-          this.leftRotate(wId, recorder, line);
+          this.leftRotate(wId, recorder, line, 11);
 
           // 更新兄弟
           wId = xParent.left ?? NIL_ID;
@@ -1236,11 +1280,12 @@ export class RBTreeRuntime implements StructureRuntime {
               `父节点 ${xParent.key} 染为黑色，兄弟的左子节点染为黑色，` +
               `然后对父节点 ${xParent.key} 右旋。修复完成。`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [wId, xParentId, wLeftUpdated],
             payload: { recolors },
           });
 
-          this.rightRotate(xParentId, recorder, line);
+          this.rightRotate(xParentId, recorder, line, 11);
         }
 
         // Case 4 后直接退出
@@ -1249,6 +1294,6 @@ export class RBTreeRuntime implements StructureRuntime {
     }
 
     // 确保 x（或根）为黑色
-    this.ensureRootBlack(recorder, line);
+    this.ensureRootBlack(recorder, line, 12);
   }
 }
