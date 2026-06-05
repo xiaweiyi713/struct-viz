@@ -81,6 +81,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `插入 ${key}`,
       description: `开始插入关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -94,6 +95,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `创建根节点，插入 ${key}`,
         description: `B 树为空，创建根节点`,
         codeLine: line,
+        pseudoLine: 14,
         targets: [root.id],
       });
       return;
@@ -112,10 +114,11 @@ export class BTreeRuntime implements StructureRuntime {
         title: "根节点已满，分裂",
         description: `根节点关键字数达到 ${2 * this.t - 1}，创建新根并分裂`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [newRoot.id],
       });
 
-      this.splitChild(newRoot, 0, recorder, line);
+      this.splitChild(newRoot, 0, recorder, line, 6);
     }
 
     this.insertNonFull(this.rootId, key, recorder, line);
@@ -130,6 +133,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：B 树为空`,
         description: "B 树为空，查找失败",
         codeLine: line,
+        pseudoLine: 7,
         targets: [],
       });
       return;
@@ -146,6 +150,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `访问节点 [${node.keys.join(", ")}]`,
       description: `在节点中查找 ${key}`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [nodeId],
     });
 
@@ -160,6 +165,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `找到 ${key}`,
         description: `在节点 [${node.keys.join(", ")}] 中找到关键字 ${key}`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [nodeId],
         payload: { found: true },
       });
@@ -173,6 +179,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：未找到`,
         description: `搜索到叶子节点 [${node.keys.join(", ")}] 仍未找到 ${key}`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [nodeId],
         payload: { found: false },
       });
@@ -185,6 +192,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `${key} 可能在子树 ${idx} 中`,
       description: `${key} 不在当前节点，进入第 ${idx} 个子节点继续查找`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [nodeId],
       payload: { direction: "child", childIndex: idx },
     });
@@ -199,7 +207,7 @@ export class BTreeRuntime implements StructureRuntime {
     return node;
   }
 
-  private splitChild(parent: BTreeNode, index: number, recorder: TraceRecorder, line: number): void {
+  private splitChild(parent: BTreeNode, index: number, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const t = this.t;
     const child = this.nodes.get(parent.children[index])!;
     const sibling = this.createNode(child.isLeaf);
@@ -228,6 +236,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `分裂: 提升 ${promotedKey}`,
       description: `节点关键字超过 ${2 * t - 1}，将 ${promotedKey} 提升到父节点`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [parent.id, child.id, sibling.id],
     });
   }
@@ -241,6 +250,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `访问节点 [${node.keys.join(", ")}]`,
       description: `查找 ${key} 的插入位置`,
       codeLine: line,
+      pseudoLine: 12,
       targets: [nodeId],
     });
 
@@ -256,6 +266,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `在叶子节点插入 ${key}`,
         description: `位置 ${pos}，节点关键字: [${node.keys.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 14,
         targets: [nodeId],
       });
     } else {
@@ -267,7 +278,7 @@ export class BTreeRuntime implements StructureRuntime {
       const child = this.nodes.get(childId)!;
 
       if (child.keys.length === 2 * t - 1) {
-        this.splitChild(node, pos, recorder, line);
+        this.splitChild(node, pos, recorder, line, 18);
 
         // 分裂后决定往哪个子节点插入
         if (key > node.keys[pos]) {
@@ -290,6 +301,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `删除 ${key}`,
         description: `B 树为空，无法删除`,
         codeLine: line,
+        pseudoLine: 0,
         targets: [],
       });
       return;
@@ -300,6 +312,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `删除 ${key}`,
       description: `开始从 B 树中删除关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -319,6 +332,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: "根节点变空，降低树高",
         description: `删除空根节点，新根为 [${newRoot?.keys.join(", ") ?? ""}]`,
         codeLine: line,
+        pseudoLine: 20,
         targets: [this.rootId!],
       });
     }
@@ -328,6 +342,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `删除 ${key} 完成`,
       description: `B 树删除操作结束`,
       codeLine: line,
+      pseudoLine: 20,
       targets: [],
     });
   }
@@ -341,6 +356,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `在节点 [${node.keys.join(", ")}] 中查找 ${key}`,
       description: `搜索关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [nodeId],
     });
 
@@ -359,6 +375,7 @@ export class BTreeRuntime implements StructureRuntime {
           title: `从叶子节点删除 ${key}`,
           description: `节点关键字变为 [${node.keys.join(", ")}]`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [nodeId],
         });
       } else {
@@ -373,6 +390,7 @@ export class BTreeRuntime implements StructureRuntime {
           title: `${key} 不在树中`,
           description: `搜索到叶子节点仍未找到 ${key}`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [nodeId],
         });
         return;
@@ -387,6 +405,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `进入子节点 [${this.nodes.get(childId)?.keys.join(", ") ?? ""}]`,
         description: `key ${key} 可能在索引 ${idx} 的子树中`,
         codeLine: line,
+        pseudoLine: 19,
         targets: [childId],
       });
 
@@ -423,6 +442,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `用前驱 ${predecessor} 替换 ${key}`,
         description: `左子树最大值 ${predecessor} 上移替换 ${key}`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [nodeId, predChildId],
       });
 
@@ -437,6 +457,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `用后继 ${successor} 替换 ${key}`,
         description: `右子树最小值 ${successor} 上移替换 ${key}`,
         codeLine: line,
+        pseudoLine: 12,
         targets: [nodeId, succChildId],
       });
 
@@ -444,7 +465,7 @@ export class BTreeRuntime implements StructureRuntime {
       this.deleteFromNode(succChildId, successor, recorder, line);
     } else {
       // 情况 2c：前驱和后继子节点都只有 t-1 个 key，合并后递归删除
-      this.mergeChildren(nodeId, idx, recorder, line);
+      this.mergeChildren(nodeId, idx, recorder, line, 15);
       // 合并后 key 被下移到了合并后的节点（即原来的 predChildId）中
       this.deleteFromNode(predChildId, key, recorder, line);
     }
@@ -459,6 +480,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `查找前驱: 访问 [${cur.keys.join(", ")}]`,
         description: `沿右子树向下查找最大值`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [cur.id],
       });
       cur = this.nodes.get(cur.children[cur.children.length - 1])!;
@@ -468,6 +490,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `前驱为 ${cur.keys[cur.keys.length - 1]}`,
       description: `在叶子节点 [${cur.keys.join(", ")}] 中找到`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [cur.id],
     });
     return cur.keys[cur.keys.length - 1];
@@ -482,6 +505,7 @@ export class BTreeRuntime implements StructureRuntime {
         title: `查找后继: 访问 [${cur.keys.join(", ")}]`,
         description: `沿左子树向下查找最小值`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [cur.id],
       });
       cur = this.nodes.get(cur.children[0])!;
@@ -491,6 +515,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `后继为 ${cur.keys[0]}`,
       description: `在叶子节点 [${cur.keys.join(", ")}] 中找到`,
       codeLine: line,
+      pseudoLine: 11,
       targets: [cur.id],
     });
     return cur.keys[0];
@@ -524,10 +549,10 @@ export class BTreeRuntime implements StructureRuntime {
     // 无法借位，执行合并
     if (idx < node.children.length - 1) {
       // 与右兄弟合并
-      this.mergeChildren(nodeId, idx, recorder, line);
+      this.mergeChildren(nodeId, idx, recorder, line, 19);
     } else {
       // 是最后一个子节点，与左兄弟合并
-      this.mergeChildren(nodeId, idx - 1, recorder, line);
+      this.mergeChildren(nodeId, idx - 1, recorder, line, 19);
     }
   }
 
@@ -559,6 +584,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `从左兄弟借位 ${borrowedKey}`,
       description: `左兄弟最大 key ${borrowedKey} 上移到父，父 key 下移到当前节点`,
       codeLine: line,
+      pseudoLine: 19,
       targets: [nodeId, leftSiblingId, childId],
     });
   }
@@ -591,12 +617,13 @@ export class BTreeRuntime implements StructureRuntime {
       title: `从右兄弟借位 ${borrowedKey}`,
       description: `右兄弟最小 key ${borrowedKey} 上移到父，父 key 下移到当前节点`,
       codeLine: line,
+      pseudoLine: 19,
       targets: [nodeId, rightSiblingId, childId],
     });
   }
 
   /** 将第 idx 和 idx+1 个子节点合并：child[idx] + parent.keys[idx] + child[idx+1] → child[idx] */
-  private mergeChildren(nodeId: string, idx: number, recorder: TraceRecorder, line: number): void {
+  private mergeChildren(nodeId: string, idx: number, recorder: TraceRecorder, line: number, pseudo?: number): void {
     const node = this.nodes.get(nodeId)!;
     const leftChildId = node.children[idx];
     const rightChildId = node.children[idx + 1];
@@ -631,6 +658,7 @@ export class BTreeRuntime implements StructureRuntime {
       title: `合并节点: ${separatorKey}`,
       description: `将子节点与兄弟合并，父 key ${separatorKey} 下移。合并后 [${leftChild.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: pseudo,
       targets: [nodeId, leftChildId],
     });
   }
