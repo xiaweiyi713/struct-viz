@@ -165,6 +165,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `开始插入 ${key}`,
       description: `准备将关键字 ${key} 插入 2-3 树`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -179,6 +180,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `创建根节点，插入 ${key}`,
         description: `2-3 树为空，创建根节点（2-节点）并插入 ${key}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [root.id],
       });
 
@@ -187,6 +189,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `插入 ${key} 完成`,
         description: `${key} 已作为根节点插入`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [root.id],
       });
       return;
@@ -207,6 +210,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `插入 ${key} 完成`,
       description: `关键字 ${key} 已成功插入 2-3 树`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [this.rootId!],
     });
   }
@@ -227,6 +231,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `访问节点 [${current.keys.join(", ")}]`,
         description: `正在查找 ${key} 的插入位置，当前节点关键字: [${current.keys.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
       });
 
@@ -237,6 +242,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `找到叶子节点 [${current.keys.join(", ")}]`,
           description: `${key} 应插入此叶子节点`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [currentId],
         });
         return currentId;
@@ -263,6 +269,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `比较 ${key} 与 ${node.keys[0]}`,
         description: `${key} ${goLeft ? "<" : ">="} ${node.keys[0]}，${goLeft ? "进入左子树" : "进入右子树"}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [node.id],
       });
       return goLeft ? 0 : 1;
@@ -274,6 +281,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `比较 ${key} 与 [${node.keys[0]}, ${node.keys[1]}]`,
           description: `${key} < ${node.keys[0]}，进入左子树`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [node.id],
         });
         return 0;
@@ -283,6 +291,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `比较 ${key} 与 [${node.keys[0]}, ${node.keys[1]}]`,
           description: `${node.keys[0]} <= ${key} < ${node.keys[1]}，进入中间子树`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [node.id],
         });
         return 1;
@@ -292,6 +301,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `比较 ${key} 与 [${node.keys[0]}, ${node.keys[1]}]`,
           description: `${key} >= ${node.keys[1]}，进入右子树`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [node.id],
         });
         return 2;
@@ -317,6 +327,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `叶子节点溢出 [${leaf.keys.join(", ")}]`,
         description: `插入 ${key} 后叶子节点变成临时 4-节点 [${leaf.keys.join(", ")}]，需要分裂`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [leaf.id],
       });
     } else {
@@ -325,6 +336,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `在叶子节点插入 ${key}`,
         description: `插入后节点关键字: [${leaf.keys.join(", ")}]，${leaf.keys.length === 1 ? "2-节点" : "3-节点"}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [leaf.id],
       });
     }
@@ -364,6 +376,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `分裂节点 [${current.keys.join(", ")}]`,
         description: `4-节点 [${leftKey}, ${midKey}, ${rightKey}] 分裂：左节点 [${leftKey}]，提升 ${midKey}，右节点 [${rightKey}]`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId, leftNode.id, rightNode.id],
       });
 
@@ -405,6 +418,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `根节点分裂，${midKey} 成为新根`,
           description: `根节点溢出，将 ${midKey} 提升为新的根节点`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [newRoot.id],
         });
 
@@ -413,6 +427,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `连接新根与子节点`,
           description: `新根 [${midKey}] 的左子节点 [${leftKey}]，右子节点 [${rightKey}]`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [newRoot.id, leftNode.id, rightNode.id],
         });
         return; // 新根只有 1 个 key，不会溢出
@@ -445,6 +460,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `提升 ${midKey} 到父节点 [${parent.keys.join(", ")}]`,
           description: `将 ${midKey} 提升到父节点，父节点关键字变为 [${parent.keys.join(", ")}]`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [parent.id],
         });
 
@@ -453,6 +469,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `连接 [${leftKey}] 和 [${rightKey}] 到父节点`,
           description: `分裂产生的 [${leftKey}] 和 [${rightKey}] 连接到父节点`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [parent.id, leftNode.id, rightNode.id],
         });
 
@@ -474,6 +491,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `开始删除 ${key}`,
       description: `准备从 2-3 树中删除关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -483,6 +501,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `树为空`,
         description: `2-3 树为空，无法删除 ${key}`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -496,6 +515,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `未找到 ${key}`,
         description: `关键字 ${key} 不在 2-3 树中，无法删除`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -514,6 +534,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `用前驱 ${pred.key} 替换 ${key}`,
         description: `${key} 在内部节点中，用前驱 ${pred.key}（叶子节点中的最大值）替换，然后删除叶子中的 ${pred.key}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [targetNodeId, pred.nodeId],
       });
 
@@ -534,6 +555,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `从叶子节点删除 ${removedKey}`,
       description: `从叶子节点中删除 ${removedKey}，剩余关键字: [${leaf.keys.join(", ") || "空"}]`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [targetNodeId],
     });
 
@@ -557,6 +579,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `根节点变空，降低树高`,
           description: `根节点没有关键字，将其唯一子节点 [${newRoot.keys.join(", ")}] 提升为新根`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [newRootId],
         });
       } else if (root.keys.length === 0 && root.children.length === 0) {
@@ -569,6 +592,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `树已清空`,
           description: `删除最后一个关键字后 2-3 树为空`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [],
         });
       }
@@ -579,6 +603,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `删除 ${key} 完成`,
       description: `关键字 ${key} 已成功从 2-3 树中删除`,
       codeLine: line,
+      pseudoLine: 11,
       targets: this.rootId ? [this.rootId] : [],
     });
   }
@@ -599,6 +624,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `搜索节点 [${current.keys.join(", ")}]`,
         description: `正在查找 ${key}，当前节点关键字: [${current.keys.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [currentId],
       });
 
@@ -610,6 +636,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
           title: `找到 ${key}`,
           description: `在节点 [${current.keys.join(", ")}] 中找到关键字 ${key}`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [currentId],
         });
         return { nodeId: currentId, keyIndex };
@@ -645,6 +672,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `查找 ${node.keys[keyIndex]} 的前驱`,
       description: `进入 ${node.keys[keyIndex]} 的左子树查找最大值`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [currentId],
     });
 
@@ -658,6 +686,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `沿右子树向下 [${current.keys.join(", ")}]`,
         description: `查找前驱，访问节点 [${current.keys.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [currentId],
       });
     }
@@ -671,6 +700,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `找到前驱 ${predKey}`,
       description: `前驱为叶子节点 [${current.keys.join(", ")}] 中的 ${predKey}`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [currentId],
     });
 
@@ -699,6 +729,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
         title: `节点下溢`,
         description: `节点变空（下溢），父节点 [${parent.keys.join(", ")}] 需要修复`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [currentId, parentId],
       });
 
@@ -770,6 +801,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `从左兄弟借位`,
       description: `左兄弟 [${borrowedKey}] 上移到父节点，父节点 ${parentKey} 下移到空节点。父节点: [${parent.keys.join(", ")}]，当前节点: [${node.keys.join(", ")}]，左兄弟: [${leftSibling.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [nodeId, parentId, leftSiblingId!],
     });
   }
@@ -809,6 +841,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `从右兄弟借位`,
       description: `右兄弟 [${borrowedKey}] 上移到父节点，父节点 ${parentKey} 下移到空节点。父节点: [${parent.keys.join(", ")}]，当前节点: [${node.keys.join(", ")}]，右兄弟: [${rightSibling.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [nodeId, parentId, rightSiblingId!],
     });
   }
@@ -853,6 +886,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `与左兄弟合并`,
       description: `将父节点的 ${parentKey} 下移，与左兄弟合并为 [${leftSibling.keys.join(", ")}]。父节点剩余: [${parent.keys.join(", ") || "空"}]`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [leftSiblingId!, parentId],
     });
   }
@@ -898,6 +932,7 @@ export class TwoThreeTreeRuntime implements StructureRuntime {
       title: `与右兄弟合并`,
       description: `将父节点的 ${parentKey} 下移，与右兄弟合并为 [${node.keys.join(", ")}]。父节点剩余: [${parent.keys.join(", ") || "空"}]`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [nodeId, parentId],
     });
   }
