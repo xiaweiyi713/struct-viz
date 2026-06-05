@@ -83,6 +83,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `插入 ${key}`,
       description: `开始向 B+ 树插入关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -96,6 +97,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `创建根叶子节点，插入 ${key}`,
         description: `B+ 树为空，创建根节点（叶子）`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [leaf.id],
       });
       return;
@@ -115,6 +117,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `在叶子节点插入 ${key}`,
       description: `位置 ${pos}，叶子关键字: [${leaf.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [leafId],
     });
 
@@ -133,6 +136,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `查找 ${key}：B+ 树为空`,
         description: "B+ 树为空，查找失败",
         codeLine: line,
+        pseudoLine: 8,
         targets: [],
       });
       return;
@@ -148,6 +152,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `在叶子节点 [${leaf.keys.join(", ")}] 中查找 ${key}`,
       description: `扫描叶子节点的关键字`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [leafId],
     });
 
@@ -160,6 +165,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         ? `在叶子节点 [${leaf.keys.join(", ")}] 中找到关键字 ${key}`
         : `关键字 ${key} 不在叶子节点 [${leaf.keys.join(", ")}] 中`,
       codeLine: line,
+      pseudoLine: found ? 7 : 8,
       targets: [leafId],
       payload: { found },
     });
@@ -176,6 +182,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `访问内部节点 [${node.keys.join(", ")}]`,
       description: `查找 ${key} 应该进入的子树`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [nodeId],
     });
 
@@ -209,6 +216,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `访问内部节点 [${node.keys.join(", ")}]`,
       description: `查找 ${key} 应该进入的子树`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [nodeId],
     });
 
@@ -239,6 +247,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `叶子节点分裂，提升 ${promotedKey}`,
       description: `左: [${leaf.keys.join(", ")}]，右: [${newLeaf.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 4,
       targets: [leafId, newLeaf.id],
     });
 
@@ -256,6 +265,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `创建新根，提升 ${promotedKey}`,
         description: `新根关键字: [${promotedKey}]`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [newRoot.id],
       });
     } else {
@@ -271,6 +281,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `提升 ${promotedKey} 到父节点`,
         description: `父节点关键字: [${parent.keys.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [parent.id],
       });
 
@@ -302,6 +313,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `内部节点分裂，提升 ${promotedKey}`,
       description: `左: [${node.keys.join(", ")}]，右: [${sibling.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [nodeId, sibling.id],
     });
 
@@ -318,6 +330,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `创建新根，提升 ${promotedKey}`,
         description: `新根关键字: [${promotedKey}]`,
         codeLine: line,
+        pseudoLine: 10,
         targets: [newRoot.id],
       });
     } else {
@@ -341,6 +354,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `删除 ${key}`,
       description: `开始从 B+ 树删除关键字 ${key}`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -350,6 +364,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `B+ 树为空`,
         description: `无法删除 ${key}，树为空`,
         codeLine: line,
+        pseudoLine: 0,
         targets: [],
       });
       return;
@@ -367,6 +382,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
         title: `未找到 ${key}`,
         description: `关键字 ${key} 不在叶子节点中，无法删除`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [leafId],
       });
       return;
@@ -380,6 +396,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `从叶子节点删除 ${key}`,
       description: `位置 ${keyIdx}，剩余关键字: [${leaf.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [leafId],
     });
 
@@ -417,6 +434,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
           title: `更新索引 key: ${oldIndexKey} → ${newIndexKey}`,
           description: `父节点关键字: [${parent.keys.join(", ")}]`,
           codeLine: line,
+          pseudoLine: 12,
           targets: [parent.id],
         });
         // 继续向上递归更新祖先的索引 key
@@ -486,6 +504,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `从左兄弟借位 ${borrowedKey}`,
       description: `左兄弟: [${leftSibling.keys.join(", ")}]，当前叶子: [${leaf.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [leftSiblingId, leafId],
     });
 
@@ -494,6 +513,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `更新索引 key → ${leaf.keys[0]}`,
       description: `父节点关键字: [${parent.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [parent.id],
     });
   }
@@ -518,6 +538,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `从右兄弟借位 ${borrowedKey}`,
       description: `当前叶子: [${leaf.keys.join(", ")}]，右兄弟: [${rightSibling.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [leafId, rightSiblingId],
     });
 
@@ -526,6 +547,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `更新索引 key → ${rightSibling.keys[0]}`,
       description: `父节点关键字: [${parent.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [parent.id],
     });
   }
@@ -557,6 +579,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `合并叶子节点`,
       description: `合并后: [${leftLeaf.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [leftId],
     });
 
@@ -565,6 +588,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `从父节点移除索引 key`,
       description: `父节点关键字: [${parent.keys.join(", ")}]，子节点数: ${parent.children.length}`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [parentId],
     });
 
@@ -582,6 +606,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
           title: `根节点变空，降低树高`,
           description: `新根为叶子节点: [${leftLeaf.keys.join(", ")}]`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [leftId],
         });
       }
@@ -653,6 +678,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `内部节点从左兄弟借位`,
       description: `下移父 key ${parentKey}，提升 ${promotedKey}`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [leftSiblingId, nodeId],
     });
 
@@ -661,6 +687,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `更新父索引 key → ${promotedKey}`,
       description: `父节点关键字: [${parent.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [parent.id],
     });
   }
@@ -692,6 +719,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `内部节点从右兄弟借位`,
       description: `下移父 key ${parentKey}，提升 ${promotedKey}`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [nodeId, rightSiblingId],
     });
 
@@ -700,6 +728,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `更新父索引 key → ${promotedKey}`,
       description: `父节点关键字: [${parent.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [parent.id],
     });
   }
@@ -739,6 +768,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `合并内部节点，下移 key ${parentKey}`,
       description: `合并后: [${leftNode.keys.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [leftId],
     });
 
@@ -747,6 +777,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
       title: `从父节点移除索引 key`,
       description: `父节点关键字: [${parent.keys.join(", ")}]，子节点数: ${parent.children.length}`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [parentId],
     });
 
@@ -763,6 +794,7 @@ export class BPlusTreeRuntime implements StructureRuntime {
           title: `根节点变空，降低树高`,
           description: `新根关键字: [${leftNode.keys.join(", ")}]`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [leftId],
         });
       }
