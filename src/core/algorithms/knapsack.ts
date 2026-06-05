@@ -65,6 +65,7 @@ export class KnapsackRuntime implements StructureRuntime {
       title: "初始化",
       description: `${this.n} 个物品，背包容量 ${this.W}。物品: ${this.weights.map((w, i) => `(w=${w},v=${this.values[i]})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -105,6 +106,7 @@ export class KnapsackRuntime implements StructureRuntime {
               ? `比较: 不放物品${i}=${skip}, 放物品${i}=${take} → ${this.dp[i][j]}`
               : `容量不足，继承上一行: ${this.dp[i][j]}`,
             codeLine: line,
+            pseudoLine: 7,
             targets: [`c-${i}-${j}`],
           });
         } else {
@@ -113,6 +115,7 @@ export class KnapsackRuntime implements StructureRuntime {
             title: `dp[${i}][${j}] = ${this.dp[i][j]}（容量 ${j} < 重量 ${w}，无法放入）`,
             description: `继承 dp[${i - 1}][${j}] = ${this.dp[i][j]}`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [`c-${i}-${j}`],
           });
         }
@@ -138,6 +141,7 @@ export class KnapsackRuntime implements StructureRuntime {
           title: `选择物品 ${i}（w=${this.weights[i - 1]}, v=${this.values[i - 1]}）`,
           description: `dp[${i}][${j + this.weights[i - 1]}] ≠ dp[${i - 1}][${j + this.weights[i - 1]}]，说明选了物品 ${i}`,
           codeLine: line,
+          pseudoLine: 11,
           targets: [`c-${i}-${j + this.weights[i - 1]}`],
         });
       }
@@ -149,6 +153,7 @@ export class KnapsackRuntime implements StructureRuntime {
       title: `最优解: 价值 ${totalValue}`,
       description: `选中物品: ${selected.reverse().map((i) => `${i}(w=${this.weights[i - 1]},v=${this.values[i - 1]})`).join(", ")}。总价值: ${totalValue}`,
       codeLine: line,
+      pseudoLine: 11,
       targets: [],
     });
   }

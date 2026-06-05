@@ -107,6 +107,7 @@ export class MatrixChainRuntime implements StructureRuntime {
       title: "初始化",
       description: `${n} 个矩阵，维度序列 p = [${this.p.join(", ")}]。m[i][i] = 0，按链长递增填表`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -147,6 +148,7 @@ export class MatrixChainRuntime implements StructureRuntime {
           title: `m[${i}][${j}] = ${this.dp[i][j]}（最优分割点 k=${bestK}）`,
           description: `链长 ${len}：min over k=[${i},${j}) of { m[${i}][k] + m[k+1][${j}] + p[${i - 1}]*p[k]*p[${j}] } = ${this.dp[i][j]}，分割点 k=${bestK}`,
           codeLine: line,
+          pseudoLine: 9,
           targets: [`c-${i}-${j}`],
         });
 
@@ -167,6 +169,7 @@ export class MatrixChainRuntime implements StructureRuntime {
       title: `最少乘法次数: ${this.dp[1][n]}`,
       description: `最优括号化方案: ${parenPlan.join("")}`,
       codeLine: line,
+      pseudoLine: 13,
       targets: [`c-1-${n}`],
     });
   }
@@ -194,6 +197,7 @@ export class MatrixChainRuntime implements StructureRuntime {
       title: `回溯 m[${i}][${j}]，分割点 k=${k}`,
       description: `在 k=${k} 处分割为 (${this.buildExpr(i, k)}) x (${this.buildExpr(k + 1, j)})`,
       codeLine: line,
+      pseudoLine: 13,
       targets: [`c-${i}-${j}`],
     });
 

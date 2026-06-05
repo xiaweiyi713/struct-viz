@@ -52,6 +52,7 @@ export class LISRuntime implements StructureRuntime {
         title: "LIS 长度 = 0",
         description: "输入数组为空",
         codeLine: line,
+        pseudoLine: 7,
         targets: [],
       });
       return;
@@ -76,6 +77,7 @@ export class LISRuntime implements StructureRuntime {
       title: "初始化",
       description: `输入数组 arr = [${nums.join(", ")}]，长度 ${n}。初始化 dp[i] = 1（每个元素自身构成长度为 1 的子序列）`,
       codeLine: line,
+      pseudoLine: 2,
       targets: nums.map((_, i) => `dp-${i}`),
     });
 
@@ -90,6 +92,7 @@ export class LISRuntime implements StructureRuntime {
         title: `计算 dp[${i}]，当前元素 arr[${i}] = ${nums[i]}`,
         description: `开始寻找以 arr[${i}] = ${nums[i]} 结尾的最长递增子序列`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [`arr-${i}`, `dp-${i}`],
       });
 
@@ -105,6 +108,7 @@ export class LISRuntime implements StructureRuntime {
             title: `arr[${j}]=${nums[j]} < arr[${i}]=${nums[i]}，dp[${j}]+1 = ${dpValues[j]}+1 = ${candidate}`,
             description: `比较: arr[${j}]=${nums[j]} < arr[${i}]=${nums[i]}，候选值 dp[${j}]+1 = ${candidate}，当前 dp[${i}] = ${dpValues[i]}`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [`arr-${j}`, `arr-${i}`, `dp-${j}`, `dp-${i}`],
           });
 
@@ -117,6 +121,7 @@ export class LISRuntime implements StructureRuntime {
               title: `更新 dp[${i}] = ${candidate}`,
               description: `dp[${j}]+1 = ${candidate} > 当前 dp[${i}]，更新 dp[${i}] = ${candidate}`,
               codeLine: line,
+              pseudoLine: 6,
               targets: [`dp-${i}`, `dp-${j}`],
             });
           }
@@ -126,6 +131,7 @@ export class LISRuntime implements StructureRuntime {
             title: `arr[${j}]=${nums[j]} >= arr[${i}]=${nums[i]}，跳过`,
             description: `arr[${j}]=${nums[j]} 不小于 arr[${i}]=${nums[i]}，不满足递增条件，跳过`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [`arr-${j}`, `arr-${i}`],
           });
         }
@@ -142,6 +148,7 @@ export class LISRuntime implements StructureRuntime {
         title: `dp[${i}] = ${dpValues[i]} 计算完成`,
         description: `以 arr[${i}]=${nums[i]} 结尾的最长递增子序列长度为 ${dpValues[i]}`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [`dp-${i}`],
       });
 
@@ -183,6 +190,7 @@ export class LISRuntime implements StructureRuntime {
       title: `回溯 LIS 路径`,
       description: `从 dp 最大值位置 dp[${maxIdx}]=${maxLen} 开始回溯，LIS 对应下标: [${lisPath.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 7,
       targets: lisPath.flatMap((idx) => [`arr-${idx}`, `dp-${idx}`]),
     });
 
@@ -192,6 +200,7 @@ export class LISRuntime implements StructureRuntime {
       title: `LIS 长度 = ${maxLen}`,
       description: `最长递增子序列: [${lisSequence.join(", ")}]，对应下标: [${lisPath.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 7,
       targets: lisPath.flatMap((idx) => [`arr-${idx}`, `dp-${idx}`]),
     });
   }

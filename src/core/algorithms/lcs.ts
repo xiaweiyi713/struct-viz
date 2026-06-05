@@ -58,6 +58,7 @@ export class LCSRuntime implements StructureRuntime {
       title: "初始化",
       description: `s1 = "${s1}"（长度 ${m}），s2 = "${s2}"（长度 ${n}）。dp[0][j] = dp[i][0] = 0`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -84,6 +85,7 @@ export class LCSRuntime implements StructureRuntime {
             title: `dp[${i}][${j}] = dp[${i - 1}][${j - 1}] + 1 = ${val}`,
             description: `s1[${i - 1}] = '${s1[i - 1]}' == s2[${j - 1}] = '${s2[j - 1]}'，字符匹配，LCS 长度 +1`,
             codeLine: line,
+            pseudoLine: 6,
             targets: [`c-${i}-${j}`],
           });
         } else {
@@ -104,6 +106,7 @@ export class LCSRuntime implements StructureRuntime {
             title: `dp[${i}][${j}] = max(${this.dp[i - 1][j]}, ${this.dp[i][j - 1]}) = ${val}`,
             description: `s1[${i - 1}] = '${s1[i - 1]}' ≠ s2[${j - 1}] = '${s2[j - 1]}'，取上方和左方的较大值`,
             codeLine: line,
+            pseudoLine: 8,
             targets: [`c-${i}-${j}`],
           });
         }
@@ -131,6 +134,7 @@ export class LCSRuntime implements StructureRuntime {
           title: `'${s1[i - 1]}' 匹配，加入 LCS`,
           description: `dp[${i}][${j}] = ${this.dp[i][j]}，对角线回溯到 dp[${i - 1}][${j - 1}]`,
           codeLine: line,
+          pseudoLine: 10,
           targets: [`c-${i}-${j}`],
         });
 
@@ -152,6 +156,7 @@ export class LCSRuntime implements StructureRuntime {
       title: `LCS = "${lcs.join("")}"，长度 ${this.dp[m][n]}`,
       description: `最长公共子序列: "${lcs.join("")}"`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [],
     });
   }

@@ -89,6 +89,7 @@ export class EditDistanceRuntime implements StructureRuntime {
       title: "初始化边界",
       description: `s1 = "${s1}"（长度 ${m}），s2 = "${s2}"（长度 ${n}）。dp[i][0] = i（删除），dp[0][j] = j（插入）`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [],
     });
 
@@ -116,6 +117,7 @@ export class EditDistanceRuntime implements StructureRuntime {
             title: `dp[${i}][${j}] = dp[${i - 1}][${j - 1}] = ${val}`,
             description: `s1[${i - 1}] = '${s1[i - 1]}' == s2[${j - 1}] = '${s2[j - 1]}'，字符相同，无需操作`,
             codeLine: line,
+            pseudoLine: 7,
             targets: [`c-${i}-${j}`],
           });
         } else {
@@ -142,6 +144,7 @@ export class EditDistanceRuntime implements StructureRuntime {
             title: `dp[${i}][${j}] = min(${del}, ${ins}, ${rep}) = ${val}`,
             description: `s1[${i - 1}] = '${s1[i - 1]}' ≠ s2[${j - 1}] = '${s2[j - 1]}'，取删除(${del})、插入(${ins})、替换(${rep})的最小值（${opLabel}）`,
             codeLine: line,
+            pseudoLine: 9,
             targets: [`c-${i}-${j}`],
           });
         }
@@ -169,6 +172,7 @@ export class EditDistanceRuntime implements StructureRuntime {
           title: `'${s1[i - 1]}' 相同，无操作`,
           description: `dp[${i}][${j}] = ${this.dp[i][j]}，对角线回溯到 dp[${i - 1}][${j - 1}]`,
           codeLine: line,
+          pseudoLine: 14,
           targets: [`c-${i}-${j}`],
         });
         i--;
@@ -185,6 +189,7 @@ export class EditDistanceRuntime implements StructureRuntime {
           title: `替换 '${s1[i - 1]}' → '${s2[j - 1]}'`,
           description: `dp[${i}][${j}] = ${this.dp[i][j]} = dp[${i - 1}][${j - 1}] + 1，对角线回溯（替换操作）`,
           codeLine: line,
+          pseudoLine: 14,
           targets: [`c-${i}-${j}`],
         });
         i--;
@@ -197,6 +202,7 @@ export class EditDistanceRuntime implements StructureRuntime {
           title: `删除 '${s1[i - 1]}'`,
           description: `dp[${i}][${j}] = ${this.dp[i][j]} = dp[${i - 1}][${j}] + 1，向上回溯（删除操作）`,
           codeLine: line,
+          pseudoLine: 14,
           targets: [`c-${i}-${j}`],
         });
         i--;
@@ -208,6 +214,7 @@ export class EditDistanceRuntime implements StructureRuntime {
           title: `插入 '${s2[j - 1]}'`,
           description: `dp[${i}][${j}] = ${this.dp[i][j]} = dp[${i}][${j - 1}] + 1，向左回溯（插入操作）`,
           codeLine: line,
+          pseudoLine: 14,
           targets: [`c-${i}-${j}`],
         });
         j--;
@@ -223,6 +230,7 @@ export class EditDistanceRuntime implements StructureRuntime {
       title: `编辑距离 = ${this.dp[m][n]}`,
       description: `将 "${s1}" 转换为 "${s2}" 最少需要 ${this.dp[m][n]} 次操作: ${ops.join(" → ")}`,
       codeLine: line,
+      pseudoLine: 14,
       targets: [],
     });
   }
