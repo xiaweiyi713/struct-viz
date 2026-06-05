@@ -126,6 +126,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `插入 ${key}，hash(${key}) = ${h}`,
       description: `计算哈希值: ${key} % ${this.tableSize} = ${h}`,
       codeLine: line,
+      pseudoLine: this.mode === "linear" ? 3 : 1,
       targets: [this.buckets[h].id],
     });
 
@@ -157,6 +158,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `插入 ${key} 到桶 ${idx}`,
           description: `桶 ${idx} 为空，直接插入。探测次数: ${this.probeCount}`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [bucket.id],
         });
         return;
@@ -172,6 +174,7 @@ export class HashTableRuntime implements StructureRuntime {
         title: `探测桶 ${idx}：已存在 ${existing.key}`,
         description: `桶 ${idx} 已被 ${existing.key} 占用（${wasDeleted ? "已删除" : "冲突"}），继续探测`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [bucket.id],
       });
 
@@ -182,6 +185,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `键 ${key} 已存在`,
           description: `桶 ${idx} 中已有相同键 ${key}，不重复插入`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [existing.id],
         });
         return;
@@ -199,6 +203,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `插入 ${key} 到桶 ${idx}（复用已删除槽）`,
           description: `桶 ${idx} 标记为已删除，复用该位置`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [bucket.id],
         });
         return;
@@ -213,6 +218,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: "哈希表已满",
       description: `探测了 ${this.probeCount} 次，哈希表已满，无法插入 ${key}`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [],
     });
   }
@@ -231,6 +237,7 @@ export class HashTableRuntime implements StructureRuntime {
         title: `检查桶 ${h} 链表中的 ${entry.key}`,
         description: `比较 ${key} 与 ${entry.key}`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [entry.id],
       });
 
@@ -241,6 +248,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `键 ${key} 已存在于桶 ${h}`,
           description: `不重复插入`,
           codeLine: line,
+          pseudoLine: 2,
           targets: [entry.id],
         });
         return;
@@ -259,6 +267,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `插入 ${key} 到桶 ${h} 的链表`,
       description: `桶 ${h} 链表长度变为 ${bucket.entries.length}`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [bucket.id, newEntry.id],
     });
   }
@@ -275,6 +284,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `查找 ${key}，hash(${key}) = ${h}`,
       description: `计算哈希值: ${key} % ${this.tableSize} = ${h}`,
       codeLine: line,
+      pseudoLine: this.mode === "linear" ? 13 : 6,
       targets: [this.buckets[h].id],
     });
 
@@ -300,6 +310,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `探测桶 ${idx}：空`,
           description: `桶 ${idx} 为空，查找失败。探测次数: ${this.probeCount}`,
           codeLine: line,
+          pseudoLine: 15,
           targets: [bucket.id],
         });
 
@@ -308,6 +319,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `${key} 不在哈希表中`,
           description: `查找失败`,
           codeLine: line,
+          pseudoLine: 15,
           targets: [],
           payload: { found: false },
         });
@@ -323,6 +335,7 @@ export class HashTableRuntime implements StructureRuntime {
         title: `探测桶 ${idx}：比较 ${entry.key} 与 ${key}`,
         description: `${entry.key} ${entry.key === key ? "==" : "!="} ${key}${wasDeleted ? " (已删除)" : ""}`,
         codeLine: line,
+        pseudoLine: 14,
         targets: [entry.id],
       });
 
@@ -333,6 +346,7 @@ export class HashTableRuntime implements StructureRuntime {
             title: `桶 ${idx}：${key} 已被删除，继续探测`,
             description: `找到 ${key} 但已被标记为 deleted，继续查找`,
             codeLine: line,
+            pseudoLine: 16,
             targets: [entry.id],
           });
         } else {
@@ -344,6 +358,7 @@ export class HashTableRuntime implements StructureRuntime {
             title: `找到 ${key}，在桶 ${idx}`,
             description: `查找成功！探测次数: ${this.probeCount}`,
             codeLine: line,
+            pseudoLine: 14,
             targets: [entry.id],
             payload: { found: true, index: idx },
           });
@@ -360,6 +375,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `${key} 不在哈希表中`,
       description: `探测了 ${this.probeCount} 次未找到`,
       codeLine: line,
+      pseudoLine: 17,
       targets: [],
       payload: { found: false },
     });
@@ -378,6 +394,7 @@ export class HashTableRuntime implements StructureRuntime {
         title: `桶 ${h} 链表中比较 ${entry.key} 与 ${key}`,
         description: `${entry.key} ${entry.key === key ? "==" : "!="} ${key}`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [entry.id],
       });
 
@@ -390,6 +407,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `找到 ${key}，在桶 ${h} 的链表中`,
           description: `查找成功！探测次数: ${this.probeCount}`,
           codeLine: line,
+          pseudoLine: 8,
           targets: [entry.id],
           payload: { found: true },
         });
@@ -403,6 +421,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `${key} 不在哈希表中`,
       description: `桶 ${h} 链表中未找到`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [],
       payload: { found: false },
     });
@@ -419,6 +438,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `删除 ${key}，hash(${key}) = ${h}`,
       description: `计算哈希值: ${key} % ${this.tableSize} = ${h}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [this.buckets[h].id],
     });
 
@@ -445,6 +465,7 @@ export class HashTableRuntime implements StructureRuntime {
             title: `删除桶 ${idx} 中的 ${key}（标记为已删除）`,
             description: `线性探测法删除采用懒惰删除，标记为 deleted`,
             codeLine: line,
+            pseudoLine: 3,
             targets: [entry.id],
           });
           return;
@@ -455,6 +476,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `桶 ${idx}：${entry.key} != ${key}，继续`,
           description: `当前桶中元素 ${entry.key} 与目标 ${key} 不匹配，继续探测`,
           codeLine: line,
+          pseudoLine: 1,
           targets: [bucket.id],
         });
 
@@ -479,6 +501,7 @@ export class HashTableRuntime implements StructureRuntime {
           title: `从桶 ${h} 链表中删除 ${key}`,
           description: `链表长度变为 ${bucket.entries.length}`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [bucket.id],
         });
         return;
@@ -490,6 +513,7 @@ export class HashTableRuntime implements StructureRuntime {
       title: `${key} 不在哈希表中，无法删除`,
       description: "查找失败",
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
   }

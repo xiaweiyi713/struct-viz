@@ -74,6 +74,7 @@ export class KMPRuntime implements StructureRuntime {
       title: "KMP 算法初始化",
       description: `主串: "${text}"（长度 ${text.length}），模式串: "${pattern}"（长度 ${pattern.length}）`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -86,6 +87,7 @@ export class KMPRuntime implements StructureRuntime {
       title: "next 数组计算完成",
       description: `next = [${this.nextArray.join(", ")}]`,
       codeLine: line,
+      pseudoLine: 2,
       targets: this.patternChars.map((c) => c.id),
     });
 
@@ -113,6 +115,7 @@ export class KMPRuntime implements StructureRuntime {
           title: `匹配 text[${i}] = '${text[i]}' == pattern[${j}] = '${pattern[j]}'`,
           description: `字符匹配成功！i++, j++`,
           codeLine: line,
+          pseudoLine: 7,
           targets: [`t-${i}`, `p-${j}`],
         });
 
@@ -136,6 +139,7 @@ export class KMPRuntime implements StructureRuntime {
             title: `匹配成功！在位置 ${matchStart} 处找到模式串`,
             description: `模式串 "${pattern}" 在主串 "${text}" 中首次出现在位置 ${matchStart}`,
             codeLine: line,
+            pseudoLine: 10,
             targets: this.textChars.slice(matchStart, matchStart + pattern.length).map((c) => c.id),
             payload: { matchStart },
           });
@@ -151,6 +155,7 @@ export class KMPRuntime implements StructureRuntime {
           title: `失配 text[${i}] = '${text[i]}' != pattern[${j}] = '${pattern[j]}'`,
           description: `字符不匹配`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [`t-${i}`, `p-${j}`],
         });
 
@@ -161,6 +166,7 @@ export class KMPRuntime implements StructureRuntime {
             title: `next[${j}] = -1，i 后移，j 回到 0`,
             description: `j 回退到 0 无意义，主串指针 i 后移一位`,
             codeLine: line,
+            pseudoLine: 4,
             targets: [`t-${i}`],
           });
           i++;
@@ -174,6 +180,7 @@ export class KMPRuntime implements StructureRuntime {
             title: `j 回退: ${oldJ} -> ${j}（next[${oldJ}] = ${j}）`,
             description: `模式串右滑，j 回退到 next[${oldJ}] = ${j}，i 不变`,
             codeLine: line,
+            pseudoLine: 6,
             targets: [`p-${j}`],
           });
         }
@@ -190,6 +197,7 @@ export class KMPRuntime implements StructureRuntime {
       title: "匹配失败",
       description: `主串已遍历完毕，未找到模式串 "${pattern}"`,
       codeLine: line,
+      pseudoLine: 4,
       targets: [],
       payload: { found: false },
     });
@@ -220,6 +228,7 @@ export class KMPRuntime implements StructureRuntime {
           title: `计算 next[${i}] = ${j}`,
           description: `pattern[${i - 1}] = '${pattern[i - 1]}' ${j > 0 ? `== pattern[${j - 1}] = '${pattern[j - 1]}'` : ""}，next[${i}] = ${j}`,
           codeLine: line,
+          pseudoLine: 21,
           targets: [`p-${i}`],
         });
       } else {
@@ -228,6 +237,7 @@ export class KMPRuntime implements StructureRuntime {
           title: `计算 next: pattern[${i}] != pattern[${j}]，j 回退到 next[${j}] = ${next[j]}`,
           description: `失配，j 回退`,
           codeLine: line,
+          pseudoLine: 18,
           targets: [`p-${i}`, `p-${j}`],
         });
         j = next[j];

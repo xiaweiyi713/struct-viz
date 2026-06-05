@@ -47,6 +47,7 @@ export class BinarySearchRuntime implements StructureRuntime {
       title: "初始化有序数组",
       description: `有序数组: [${values.join(", ")}]，查找目标: ${target}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -70,6 +71,7 @@ export class BinarySearchRuntime implements StructureRuntime {
         title: `区间 [${low}, ${high}]，mid = ${mid}`,
         description: `low = ${low}，high = ${high}，mid = ${mid}，arr[mid] = ${this.arr[mid]}`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [this.itemIds[mid]],
       });
 
@@ -81,6 +83,7 @@ export class BinarySearchRuntime implements StructureRuntime {
           title: `找到 ${target}，位置 ${mid}`,
           description: `arr[${mid}] = ${this.arr[mid]} = ${target}，查找成功`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemIds[mid]],
           payload: { found: true, index: mid },
         });
@@ -93,6 +96,7 @@ export class BinarySearchRuntime implements StructureRuntime {
           title: `${this.arr[mid]} < ${target}，向右半区查找`,
           description: `arr[mid] = ${this.arr[mid]} < ${target}，排除左半区 [${low}, ${mid}]，新区间 [${mid + 1}, ${high}]`,
           codeLine: line,
+          pseudoLine: 7,
           targets: this.itemIds.slice(low, mid + 1),
         });
         low = mid + 1;
@@ -102,6 +106,7 @@ export class BinarySearchRuntime implements StructureRuntime {
           title: `${this.arr[mid]} > ${target}，向左半区查找`,
           description: `arr[mid] = ${this.arr[mid]} > ${target}，排除右半区 [${mid}, ${high}]，新区间 [${low}, ${mid - 1}]`,
           codeLine: line,
+          pseudoLine: 9,
           targets: this.itemIds.slice(mid, high + 1),
         });
         high = mid - 1;
@@ -113,6 +118,7 @@ export class BinarySearchRuntime implements StructureRuntime {
       title: `未找到 ${target}`,
       description: `查找区间已缩小为空（low = ${low} > high = ${high}），${target} 不在数组中`,
       codeLine: line,
+      pseudoLine: 10,
       targets: [],
       payload: { found: false },
     });

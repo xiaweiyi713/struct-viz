@@ -72,6 +72,7 @@ export class NaiveStringMatchingRuntime implements StructureRuntime {
       title: "朴素模式匹配初始化",
       description: `主串: "${text}"（长度 ${text.length}），模式串: "${pattern}"（长度 ${pattern.length}）。从左到右逐字符比较，失配时主串指针回退。`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -96,6 +97,7 @@ export class NaiveStringMatchingRuntime implements StructureRuntime {
           title: `匹配 text[${i}] = '${text[i]}' == pattern[${j}] = '${pattern[j]}'`,
           description: `字符匹配成功！i++, j++`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [`t-${i}`, `p-${j}`],
         });
 
@@ -118,6 +120,7 @@ export class NaiveStringMatchingRuntime implements StructureRuntime {
             title: `匹配成功！在位置 ${matchStart} 处找到模式串`,
             description: `模式串 "${pattern}" 在主串 "${text}" 中首次出现在位置 ${matchStart}`,
             codeLine: line,
+            pseudoLine: 4,
             targets: this.textChars.slice(matchStart, matchStart + m).map((c) => c.id),
             payload: { matchStart },
           });
@@ -134,6 +137,7 @@ export class NaiveStringMatchingRuntime implements StructureRuntime {
           title: `失配 text[${i}] = '${text[i]}' != pattern[${j}] = '${pattern[j]}'`,
           description: `字符不匹配。主串指针回退到 ${backtrack}，模式串指针重置为 0`,
           codeLine: line,
+          pseudoLine: 3,
           targets: [`t-${i}`, `p-${j}`],
         });
 
@@ -151,6 +155,7 @@ export class NaiveStringMatchingRuntime implements StructureRuntime {
       title: "匹配失败",
       description: `主串已遍历完毕，未找到模式串 "${pattern}"`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
       payload: { found: false },
     });
