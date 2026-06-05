@@ -249,6 +249,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "初始化距离",
       description: `Dijkstra 算法开始。将源节点 ${source} 的距离设为 0，其余节点距离设为 ∞。${initDistances.join("；")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [sourceId],
       payload: { source },
     });
@@ -286,6 +287,7 @@ export class GraphRuntime implements StructureRuntime {
           title: "无可达节点",
           description: `剩余未访问节点 [${unreachableLabels.join(", ")}] 的距离均为 ∞，无法继续松弛，算法结束`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [],
         });
         break;
@@ -303,6 +305,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `访问节点 ${currentNode.label}（距离 = ${currentNode.distance}）`,
         description: `从未访问节点中选择距离最小的节点 ${currentNode.label}（d = ${currentNode.distance}）。${currentNode.previous !== null ? `前驱节点为 ${this.nodes.get(currentNode.previous)!.label}` : "该节点为源节点"}`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [minId],
       });
 
@@ -335,6 +338,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `松弛边 ${currentNode.label} -> ${neighborNode.label}`,
             description: `考察边 (${currentNode.label}, ${neighborNode.label})，权重 = ${weight}。${newDist} < ${oldDistStr}，松弛成功`,
             codeLine: line,
+            pseudoLine: 9,
             targets: [edgeId],
             payload: { from: currentNode.label, to: neighborNode.label, weight },
           });
@@ -344,6 +348,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `更新 d[${neighborNode.label}] = ${oldDistStr} -> ${newDist}`,
             description: `经过节点 ${currentNode.label} 到达 ${neighborNode.label} 的路径更短: d[${currentNode.label}] + ${weight} = ${currentNode.distance} + ${weight} = ${newDist}，小于原距离 ${oldDistStr}`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [to],
             payload: {
               node: neighborNode.label,
@@ -360,6 +365,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `考察边 ${currentNode.label} -> ${neighborNode.label}（无需松弛）`,
             description: `考察边 (${currentNode.label}, ${neighborNode.label})，权重 = ${weight}。${newDist} >= ${oldDistStr}，不更新`,
             codeLine: line,
+            pseudoLine: 9,
             targets: [edgeId],
             payload: { from: currentNode.label, to: neighborNode.label, weight },
           });
@@ -383,6 +389,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `节点 ${currentNode.label} 已确定最短路径`,
         description: `节点 ${currentNode.label} 的最短距离 ${currentNode.distance} 已确定（Dijkstra 贪心性质：已确定节点的距离不会再被更新）。已确定节点: [${finalizedLabels.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 7,
         targets: [minId],
         payload: { distance: currentNode.distance },
       });
@@ -405,6 +412,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `BFS 从节点 ${source} 开始`,
       description: `初始化：将源节点 ${source} 入队，距离设为 0`,
       codeLine: line,
+      pseudoLine: 4,
       targets: [sourceId],
     });
 
@@ -421,6 +429,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `出队节点 ${current.label}`,
         description: `当前队列: [${queue.map((id) => this.nodes.get(id)!.label).join(", ")}]。访问节点 ${current.label}（层 ${current.distance}）`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [currentId],
       });
 
@@ -442,6 +451,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `发现节点 ${neighbor.label}（层 ${neighbor.distance}）`,
             description: `从 ${current.label} 发现未访问节点 ${neighbor.label}，入队。队列: [${queue.map((id) => this.nodes.get(id)!.label).join(", ")}]`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [to],
           });
         } else {
@@ -451,6 +461,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `检查边 ${current.label} -> ${neighbor.label}`,
             description: `节点 ${neighbor.label} 已访问过，跳过`,
             codeLine: line,
+            pseudoLine: 8,
             targets: [edgeId],
           });
           edge.status = "normal";
@@ -463,6 +474,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "BFS 遍历完成",
       description: `遍历顺序: [${visitedOrder.join(" -> ")}]。共访问 ${visitedOrder.length} 个节点`,
       codeLine: line,
+      pseudoLine: 5,
       targets: [],
     });
   }
@@ -479,6 +491,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `DFS 从节点 ${source} 开始`,
       description: "使用递归方式进行深度优先搜索",
       codeLine: line,
+      pseudoLine: 3,
       targets: [sourceId],
     });
 
@@ -490,6 +503,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "DFS 遍历完成",
       description: `遍历顺序: [${visitedOrder.join(" -> ")}]。共访问 ${visitedOrder.length} 个节点`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [],
     });
   }
@@ -505,6 +519,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `访问节点 ${node.label}`,
       description: `递归深度 ${visitedOrder.length}，进入节点 ${node.label}`,
       codeLine: line,
+      pseudoLine: 6,
       targets: [nodeId],
     });
 
@@ -520,6 +535,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `探索边 ${node.label} -> ${neighbor.label}`,
           description: `从 ${node.label} 深入未访问节点 ${neighbor.label}`,
           codeLine: line,
+          pseudoLine: 9,
           targets: [edgeId, to],
         });
 
@@ -531,6 +547,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `回溯边 ${node.label} -> ${neighbor.label}`,
           description: `节点 ${neighbor.label} 已访问（${neighbor.status === "final" ? "已完成" : "正在访问"}），跳过`,
           codeLine: line,
+          pseudoLine: 8,
           targets: [edgeId],
         });
         edge.status = "normal";
@@ -543,6 +560,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `回溯离开节点 ${node.label}`,
       description: `节点 ${node.label} 的所有邻居已处理完毕`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [nodeId],
     });
   }
@@ -568,6 +586,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `Prim 从节点 ${source} 开始`,
       description: `初始化：所有节点 key 值设为 ∞，源节点 ${source} 的 key 设为 0`,
       codeLine: line,
+      pseudoLine: 3,
       targets: [sourceId],
       payload: { source },
     });
@@ -589,6 +608,7 @@ export class GraphRuntime implements StructureRuntime {
             title: "Prim：图不连通，无法构建 MST",
             description: `剩余节点不可达，已构建 ${inMST.size}/${this.nodes.size} 个节点的 MST`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [],
           });
           return;
@@ -611,6 +631,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `加入节点 ${node.label}（key = ${minKey === Infinity ? "∞" : minKey}）`,
         description: `选择 key 最小的未加入节点 ${node.label} 加入 MST${mstEdgeId ? `，通过边 ${mstEdgeId}` : "（源节点）"}`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [minId],
       });
 
@@ -634,6 +655,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `更新节点 ${this.nodes.get(to)!.label} 的 key: ${oldKey === Infinity ? "∞" : oldKey} -> ${weight}`,
             description: `边 (${node.label}, ${this.nodes.get(to)!.label}) 权重 ${weight} < 当前 key，更新`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [edgeId],
           });
         } else {
@@ -642,6 +664,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `边 (${node.label}, ${this.nodes.get(to)!.label}) 权重 ${weight} ≥ key ${key.get(to)}，跳过`,
             description: `不更新`,
             codeLine: line,
+            pseudoLine: 8,
             targets: [edgeId],
           });
           edge.status = "normal";
@@ -657,6 +680,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "Prim MST 构建完成",
       description: `最小生成树包含 ${mstEdges.length} 条边，总权重 = ${totalWeight}`,
       codeLine: line,
+      pseudoLine: 11,
       targets: mstEdges.map((e) => e.id),
       payload: { totalWeight },
     });
@@ -672,6 +696,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "Kruskal 算法开始",
       description: "按边权从小到大排序，逐步选取不形成环的边",
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -708,6 +733,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "边排序完成",
       description: `排序后: ${sortedEdges.map((e) => `(${this.nodes.get(e.source)!.label},${this.nodes.get(e.target)!.label}):${e.weight}`).join(", ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -724,6 +750,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `考察边 (${srcLabel}, ${tgtLabel})，权重 ${edge.weight}`,
         description: `检查加入此边是否形成环`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [edge.id],
       });
 
@@ -737,6 +764,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `加入边 (${srcLabel}, ${tgtLabel})`,
           description: `不形成环，加入 MST。当前已选 ${edgeCount} 条边，总权重 ${totalWeight}`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [edge.id, edge.source, edge.target],
         });
 
@@ -749,6 +777,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `跳过边 (${srcLabel}, ${tgtLabel})`,
           description: `加入后会形成环，跳过`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [edge.id],
         });
       }
@@ -759,6 +788,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "Kruskal MST 构建完成",
       description: `最小生成树包含 ${edgeCount} 条边，总权重 = ${totalWeight}`,
       codeLine: line,
+      pseudoLine: 8,
       targets: [],
       payload: { totalWeight, edgeCount },
     });
@@ -783,6 +813,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "拓扑排序开始",
       description: `入度: ${[...inDegree.entries()].map(([id, d]) => `${this.nodes.get(id)!.label}:${d}`).join(", ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -804,6 +835,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `输出节点 ${node.label}（入度 0）`,
         description: `当前拓扑序列: [${result.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 6,
         targets: [nodeId],
       });
 
@@ -820,6 +852,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `减小 ${this.nodes.get(to)!.label} 的入度至 ${newDeg}`,
           description: `删除边 (${node.label}, ${this.nodes.get(to)!.label})，${this.nodes.get(to)!.label} 入度变为 ${newDeg}`,
           codeLine: line,
+          pseudoLine: 8,
           targets: [edgeId],
         });
 
@@ -830,6 +863,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `节点 ${this.nodes.get(to)!.label} 入度为 0，入队`,
             description: `所有前驱已处理完`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [to],
           });
         }
@@ -842,6 +876,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "图中存在环",
         description: `只输出了 ${result.length}/${this.nodes.size} 个节点，图中存在环，无法完成拓扑排序`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [],
       });
     } else {
@@ -850,6 +885,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "拓扑排序完成",
         description: `拓扑序列: [${result.join(", ")}]`,
         codeLine: line,
+        pseudoLine: 11,
         targets: [],
       });
     }
@@ -881,6 +917,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "Floyd 算法开始",
       description: `初始化距离矩阵，对角线为 0，有边的设为边权，其余为 ∞`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -894,6 +931,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `中间节点 k = ${kNode.label}`,
         description: `尝试以节点 ${kNode.label} 作为中转，检查所有节点对 (i, j)`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [ids[k]],
       });
 
@@ -912,6 +950,7 @@ export class GraphRuntime implements StructureRuntime {
               title: `d[${iLabel}][${jLabel}] = ${oldDist === Infinity ? "∞" : oldDist} -> ${dist[i][j]}`,
               description: `经过 ${kNode.label} 中转: d[${iLabel}][${kNode.label}] + d[${kNode.label}][${jLabel}] = ${dist[i][k]} + ${dist[k][j]} = ${dist[i][j]}`,
               codeLine: line,
+              pseudoLine: 6,
               targets: [ids[i], ids[k], ids[j]],
             });
           }
@@ -926,6 +965,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "Floyd 算法完成",
       description: `所有节点对的最短距离已计算完成`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [],
     });
   }
@@ -952,6 +992,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "关键路径分析开始",
       description: "AOE 网：计算事件最早发生时间 ve 和最迟发生时间 vl",
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -992,6 +1033,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `正向: 事件 ${node.label}，ve = ${ve.get(nodeId)}`,
         description: `拓扑排序计算 ve(${node.label}) = ${ve.get(nodeId)}`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [nodeId],
       });
     }
@@ -1003,6 +1045,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "关键路径：图中有环，无法计算",
         description: `拓扑排序只访问了 ${topoOrder.length}/${this.nodes.size} 个节点，图中存在环`,
         codeLine: line,
+        pseudoLine: 1,
         targets: [],
       });
       return;
@@ -1018,6 +1061,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `终点 ve = ${ve.get(lastNode)!}，初始化 vl`,
       description: `终点 ${this.nodes.get(lastNode)!.label} 的 ve 和 vl 均为 ${ve.get(lastNode)!}`,
       codeLine: line,
+      pseudoLine: 7,
       targets: [lastNode],
     });
 
@@ -1035,6 +1079,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `逆向: 事件 ${this.nodes.get(nodeId)!.label}，vl = ${vl.get(nodeId)}`,
         description: `vl(${this.nodes.get(nodeId)!.label}) = ${vl.get(nodeId)}`,
         codeLine: line,
+        pseudoLine: 9,
         targets: [nodeId],
       });
     }
@@ -1057,6 +1102,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "关键路径计算完成",
       description: `关键活动 ${criticalEdges.length} 条。总工期 = ${ve.get(lastNode)!}`,
       codeLine: line,
+      pseudoLine: 11,
       targets: criticalEdges,
       payload: {
         ve: Object.fromEntries(ve),
@@ -1081,6 +1127,7 @@ export class GraphRuntime implements StructureRuntime {
       title: `Bellman-Ford 从节点 ${source} 开始`,
       description: `初始化: d[${source}] = 0，其余为 ∞。将进行 ${this.nodes.size - 1} 轮松弛`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [sourceId],
       payload: { source },
     });
@@ -1097,6 +1144,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `第 ${round} 轮松弛`,
         description: `遍历所有边，尝试松弛`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [],
       });
 
@@ -1117,6 +1165,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `松弛 ${u.label} -> ${v.label}: d[${v.label}] = ${oldDist} -> ${v.distance}`,
             description: `d[${u.label}] + w = ${u.distance} + ${edge.weight} = ${u.distance + edge.weight} < ${oldDist}`,
             codeLine: line,
+            pseudoLine: 5,
             targets: [edge.id, edge.target],
           });
         } else {
@@ -1125,6 +1174,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `检查 ${u.label} -> ${v.label}（无需松弛）`,
             description: `d[${u.label}] = ${u.distance === Infinity ? "∞" : u.distance}, d[${u.label}] + ${edge.weight} >= d[${v.label}] = ${v.distance === Infinity ? "∞" : v.distance}`,
             codeLine: line,
+            pseudoLine: 4,
             targets: [edge.id],
           });
           edge.status = "normal";
@@ -1145,6 +1195,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `第 ${round} 轮无更新，提前终止`,
           description: "所有距离已稳定，无需继续松弛",
           codeLine: line,
+          pseudoLine: 10,
           targets: [],
         });
         break;
@@ -1164,6 +1215,7 @@ export class GraphRuntime implements StructureRuntime {
           title: "检测到负权环",
           description: `边 (${u.label}, ${v.label}) 仍可松弛，图中存在负权环`,
           codeLine: line,
+          pseudoLine: 9,
           targets: [edge.id],
         });
         break;
@@ -1191,6 +1243,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "Bellman-Ford 完成",
         description: `最短距离: [${distList.join(", ")}]。无负权环`,
         codeLine: line,
+        pseudoLine: 10,
         targets: [],
       });
     }
@@ -1209,6 +1262,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "二分图检测开始",
       description: "使用 BFS 染色法：相邻节点必须染不同颜色，若冲突则不是二分图",
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -1227,6 +1281,7 @@ export class GraphRuntime implements StructureRuntime {
         title: `从节点 ${startNode.label} 开始，染颜色 0`,
         description: "新的连通分量，将起始节点染为颜色 0",
         codeLine: line,
+        pseudoLine: 5,
         targets: [startId],
       });
 
@@ -1256,6 +1311,7 @@ export class GraphRuntime implements StructureRuntime {
               title: `节点 ${neighbor.label} 染颜色 ${newColor}`,
               description: `邻居 ${current.label}(颜色${currentColor}) → ${neighbor.label}(颜色${newColor})`,
               codeLine: line,
+              pseudoLine: 9,
               targets: [edgeId, to],
             });
           } else if (neighborColor === currentColor) {
@@ -1268,6 +1324,7 @@ export class GraphRuntime implements StructureRuntime {
               title: `冲突！节点 ${current.label} 和 ${neighbor.label} 同为颜色 ${currentColor}`,
               description: `相邻节点颜色相同，不是二分图`,
               codeLine: line,
+              pseudoLine: 8,
               targets: [edgeId, currentId, to],
             });
             break;
@@ -1277,6 +1334,7 @@ export class GraphRuntime implements StructureRuntime {
               title: `节点 ${neighbor.label} 已染颜色 ${neighborColor}，无冲突`,
               description: `颜色不同（${currentColor} vs ${neighborColor}），继续`,
               codeLine: line,
+              pseudoLine: 7,
               targets: [edgeId],
             });
             edge.status = "normal";
@@ -1293,6 +1351,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "是二分图",
         description: `所有相邻节点颜色不同，该图是二分图。颜色分配: ${[...color.entries()].map(([id, c]) => `${this.nodes.get(id)!.label}:${c}`).join(", ")}`,
         codeLine: line,
+        pseudoLine: 10,
         targets: [],
       });
     } else {
@@ -1301,6 +1360,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "不是二分图",
         description: `存在相邻同色节点，该图不是二分图`,
         codeLine: line,
+        pseudoLine: 8,
         targets: conflictEdge ? [conflictEdge] : [],
       });
     }
@@ -1329,6 +1389,7 @@ export class GraphRuntime implements StructureRuntime {
       title: "欧拉路径检测",
       description: `度数: ${ids.map((id) => `${this.nodes.get(id)!.label}:${degree.get(id)}`).join(", ")}。奇数度节点: [${oddNodes.map((id) => this.nodes.get(id)!.label).join(", ")}]（需要 0 或 2 个）`,
       codeLine: line,
+      pseudoLine: 3,
       targets: oddNodes,
     });
 
@@ -1338,6 +1399,7 @@ export class GraphRuntime implements StructureRuntime {
         title: "不存在欧拉路径",
         description: `奇数度节点有 ${oddNodes.length} 个，需要 0（欧拉回路）或 2（欧拉路径）个`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [],
       });
       return;
@@ -1354,6 +1416,7 @@ export class GraphRuntime implements StructureRuntime {
         ? `从奇数度节点 ${startLabel} 出发`
         : `所有节点度数为偶数，从 ${startLabel} 出发寻找欧拉回路`,
       codeLine: line,
+      pseudoLine: 9,
       targets: [startId],
     });
 
@@ -1401,6 +1464,7 @@ export class GraphRuntime implements StructureRuntime {
           title: `走边 (${current.label}, ${nextLabel})`,
           description: `Hierholzer: 从 ${current.label} 沿未用边走到 ${nextLabel}`,
           codeLine: line,
+          pseudoLine: 9,
           targets: [edgeId, nextId],
         });
 
@@ -1420,6 +1484,7 @@ export class GraphRuntime implements StructureRuntime {
             title: `回溯到节点 ${current.label}，加入路径`,
             description: `当前路径: [${path.join(" -> ")}]`,
             codeLine: line,
+            pseudoLine: 10,
             targets: [currentId],
           });
         }
@@ -1434,6 +1499,7 @@ export class GraphRuntime implements StructureRuntime {
       title: isCircuit ? "欧拉回路" : "欧拉路径",
       description: `${isCircuit ? "欧拉回路" : "欧拉路径"}: ${path.join(" -> ")}。经过 ${usedEdges.size} 条边`,
       codeLine: line,
+      pseudoLine: 11,
       targets: [],
     });
   }
