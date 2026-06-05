@@ -103,6 +103,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
       title: "初始化分数背包",
       description: `背包容量 ${this.capacity}，共 ${this.items.length} 个物品: ${this.items.map((it) => `(w=${it.weight},v=${it.value})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -114,6 +115,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
       title: "按单位价值降序排序",
       description: `排序后: ${this.items.map((it) => `#${it.originalIndex}(w=${it.weight},v=${it.value},r=${it.ratio.toFixed(2)})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -128,6 +130,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
         title: `考虑物品 #${item.originalIndex}: w=${item.weight}, v=${item.value}, 单位价值=${item.ratio.toFixed(2)}`,
         description: `剩余容量 ${remaining.toFixed(1)}，物品重量 ${item.weight}`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [this.itemIds[i]],
       });
 
@@ -138,6 +141,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
           title: `跳过物品 #${item.originalIndex}`,
           description: `背包已满，剩余容量为 0`,
           codeLine: line,
+          pseudoLine: 8,
           targets: [this.itemIds[i]],
         });
         continue;
@@ -155,6 +159,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
           title: `完整装入物品 #${item.originalIndex}: w=${item.weight}, v=${item.value}`,
           description: `剩余容量 ${remaining.toFixed(1)}，当前总价值 ${this.totalValue.toFixed(1)}`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemIds[i]],
         });
       } else {
@@ -171,6 +176,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
           title: `部分装入物品 #${item.originalIndex}: ${this.taken[i].toFixed(1)}/${item.weight} (${(fraction * 100).toFixed(1)}%)`,
           description: `装入价值 ${partialValue.toFixed(1)}，背包已满。当前总价值 ${this.totalValue.toFixed(1)}`,
           codeLine: line,
+          pseudoLine: 10,
           targets: [this.itemIds[i]],
         });
       }
@@ -181,6 +187,7 @@ export class FractionalKnapsackRuntime implements StructureRuntime {
       title: `分数背包完成，最大价值 ${this.totalValue.toFixed(1)}`,
       description: `装入物品: ${this.items.map((it, i) => this.taken[i] > 0 ? `#${it.originalIndex}(${this.taken[i]}/${it.weight})` : null).filter(Boolean).join(", ")}。总价值 ${this.totalValue.toFixed(1)}`,
       codeLine: line,
+      pseudoLine: 13,
       targets: this.itemIds.filter((_, i) => this.taken[i] > 0),
     });
   }

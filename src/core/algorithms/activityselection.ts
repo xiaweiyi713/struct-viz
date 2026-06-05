@@ -65,6 +65,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
       title: "初始化活动集合",
       description: `共 ${this.activities.length} 个活动: ${this.activities.map((a) => `(${a.start},${a.finish})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 0,
       targets: [],
     });
 
@@ -76,6 +77,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
       title: "按结束时间排序",
       description: `排序后: ${this.activities.map((a) => `(${a.start},${a.finish})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -90,6 +92,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
       title: `选择活动 0: (${this.activities[0].start}, ${this.activities[0].finish})`,
       description: `总是选择第一个（最早结束的）活动`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [this.itemIds[0]],
     });
 
@@ -101,6 +104,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
         title: `检查活动 ${i}: start=${this.activities[i].start}, finish=${this.activities[i].finish}`,
         description: `活动 ${i} 开始时间 ${this.activities[i].start} ${this.activities[i].start >= lastFinish ? "≥" : "<"} 上一个选择活动的结束时间 ${lastFinish}`,
         codeLine: line,
+        pseudoLine: 5,
         targets: [this.itemIds[i]],
       });
 
@@ -115,6 +119,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
           title: `选择活动 ${i}: (${this.activities[i].start}, ${this.activities[i].finish})`,
           description: `活动 ${i} 兼容，加入选择集合。当前已选 ${count} 个活动`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [this.itemIds[i]],
         });
       } else {
@@ -125,6 +130,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
           title: `跳过活动 ${i}: (${this.activities[i].start}, ${this.activities[i].finish})`,
           description: `开始时间 ${this.activities[i].start} < 结束时间 ${lastFinish}，与已选活动冲突`,
           codeLine: line,
+          pseudoLine: 5,
           targets: [this.itemIds[i]],
         });
       }
@@ -135,6 +141,7 @@ export class ActivitySelectionRuntime implements StructureRuntime {
       title: "活动选择完成",
       description: `共选出 ${count} 个兼容活动。贪心策略：每次选最早结束且不冲突的活动。`,
       codeLine: line,
+      pseudoLine: 8,
       targets: this.itemIds.filter((_, i) => this.selected[i]),
     });
   }

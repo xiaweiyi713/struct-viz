@@ -82,6 +82,7 @@ export class HuffmanTreeRuntime implements StructureRuntime {
       title: "开始构建哈夫曼树",
       description: `权值序列: [${weights.join(", ")}]，共 ${weights.length} 个权值`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -105,6 +106,7 @@ export class HuffmanTreeRuntime implements StructureRuntime {
         title: `创建叶子节点（权值 ${weights[i]}）`,
         description: `初始森林中添加权值为 ${weights[i]} 的叶子节点`,
         codeLine: line,
+        pseudoLine: 2,
         targets: [id],
       });
     }
@@ -125,6 +127,7 @@ export class HuffmanTreeRuntime implements StructureRuntime {
         title: `选择最小的两个节点: ${leftNode.key} 和 ${rightNode.key}`,
         description: `从森林中选取权值最小的两个节点 ${leftNode.key} 和 ${rightNode.key}，合并为新节点（权值 ${newWeight}）`,
         codeLine: line,
+        pseudoLine: 4,
         targets: [leftId, rightId],
       });
 
@@ -151,6 +154,7 @@ export class HuffmanTreeRuntime implements StructureRuntime {
         title: `合并为新节点 ${newWeight}（${leftNode.key} + ${rightNode.key}）`,
         description: `左子: ${leftNode.key}，右子: ${rightNode.key}，新节点权值: ${newWeight}。剩余 ${forest.length} 棵树`,
         codeLine: line,
+        pseudoLine: 8,
         targets: [parentId, leftId, rightId],
         payload: { leftWeight: leftNode.key, rightWeight: rightNode.key, newWeight },
       });
@@ -163,6 +167,7 @@ export class HuffmanTreeRuntime implements StructureRuntime {
       title: "哈夫曼树构建完成",
       description: `根节点权值: ${this.getNode(this.rootId).key}，WPL（带权路径长度）即为根节点权值`,
       codeLine: line,
+      pseudoLine: 10,
       targets: [this.rootId],
     });
   }

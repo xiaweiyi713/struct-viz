@@ -94,6 +94,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
       title: "初始化作业调度",
       description: `共 ${this.jobs.length} 个作业: ${this.jobs.map((j) => `#${j.originalIndex}(d=${j.deadline},p=${j.profit})`).join(" ")}。最大 deadline=${this.maxSlots}，共 ${this.maxSlots} 个时间槽`,
       codeLine: line,
+      pseudoLine: 2,
       targets: [],
     });
 
@@ -105,6 +106,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
       title: "按利润降序排序",
       description: `排序后: ${this.jobs.map((j) => `#${j.originalIndex}(d=${j.deadline},p=${j.profit})`).join(" ")}`,
       codeLine: line,
+      pseudoLine: 1,
       targets: [],
     });
 
@@ -119,6 +121,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
         title: `考虑作业 #${job.originalIndex}: deadline=${job.deadline}, profit=${job.profit}`,
         description: `寻找 deadline=${job.deadline} 之前最晚的空闲时间槽`,
         codeLine: line,
+        pseudoLine: 3,
         targets: [this.jobIds[i]],
       });
 
@@ -142,6 +145,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
           title: `分配作业 #${job.originalIndex} 到时间槽 ${assignedSlot + 1}`,
           description: `利润 ${job.profit}，当前总利润 ${totalProfit}`,
           codeLine: line,
+          pseudoLine: 6,
           targets: [this.jobIds[i], this.slotIds[assignedSlot]],
         });
       } else {
@@ -152,6 +156,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
           title: `丢弃作业 #${job.originalIndex}: 无可用时间槽`,
           description: `deadline=${job.deadline} 之前的所有时间槽已满`,
           codeLine: line,
+          pseudoLine: 4,
           targets: [this.jobIds[i]],
         });
       }
@@ -166,6 +171,7 @@ export class JobSchedulingRuntime implements StructureRuntime {
       title: `作业调度完成，最大利润 ${totalProfit}`,
       description: `调度方案: ${scheduledJobs.join(" → ")}。总利润 ${totalProfit}。贪心策略：按利润从大到小，每个作业安排到 deadline 前最晚的空闲槽。`,
       codeLine: line,
+      pseudoLine: 8,
       targets: this.slotIds.filter((_, i) => this.schedule[i] !== null),
     });
   }
