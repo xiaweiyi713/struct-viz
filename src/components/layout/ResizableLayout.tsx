@@ -34,7 +34,11 @@ export default function ResizableLayout({ panels, children, storageKey }: Resiza
 
   const saveSizes = useCallback((newSizes: number[]) => {
     if (storageKey) {
-      localStorage.setItem(storageKey, JSON.stringify(newSizes));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newSizes));
+      } catch {
+        // 隐私模式等存储不可用时忽略
+      }
     }
   }, [storageKey]);
 

@@ -5,10 +5,19 @@ import type {
   Statement,
   Literal,
 } from "../../types/ast.js";
-import { tokenize, type Token } from "./tokenizer.js";
+import { tokenize, LexError, type Token } from "./tokenizer.js";
 
 export function parse(input: string): ParseResult {
-  const tokens = tokenize(input);
+  let tokens: Token[];
+  try {
+    tokens = tokenize(input);
+  } catch (e) {
+    // 词法错误转为 ParseError，保持 parse() 的错误收集契约
+    if (e instanceof LexError) {
+      return { program: null, errors: [{ line: e.line, column: e.column, message: e.message }] };
+    }
+    throw e;
+  }
   const errors: ParseError[] = [];
   const statements: Statement[] = [];
 

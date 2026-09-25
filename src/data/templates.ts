@@ -1061,7 +1061,7 @@ sl.search(12);`,
     description:
       "分数背包问题：物品可以分割装入背包。贪心策略：按单位价值（价值/重量）降序排序，依次装入，装不下则取部分。时间复杂度 O(n log n)。",
     code: `FractionalKnapsack fk;
-fk.solve(50, 10, 60, 20, 100, 30, 120, 20);`,
+fk.solve(50, 10, 60, 20, 100, 30, 120);`,
     supportedClass: "FractionalKnapsack",
   },
   {

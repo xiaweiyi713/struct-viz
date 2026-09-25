@@ -78,32 +78,41 @@ export class QuickSortRuntime implements StructureRuntime {
   }
 
   private quickSort(lo: number, hi: number, recorder: TraceRecorder, line: number): void {
-    if (lo >= hi) return;
+    // 尾递归优化：只对较小的一侧递归，较大的一侧用循环处理，
+    // 保证递归深度 O(log n)，有序/逆序输入也不会栈溢出
+    while (lo < hi) {
+      for (let i = lo; i <= hi; i++) {
+        if (this.statuses[i] !== "highlighted") this.statuses[i] = "active";
+      }
 
-    for (let i = lo; i <= hi; i++) {
-      if (this.statuses[i] !== "highlighted") this.statuses[i] = "active";
-    }
+      this.snapshot(recorder, line, {
+        type: "COMPARE",
+        title: `处理子数组 [${lo}..${hi}]`,
+        description: `对区间 [${lo}, ${hi}] 快速排序，选取基准元素 ${this.arr[hi]}`,
+        codeLine: line,
+        pseudoLine: 1,
+        targets: this.itemIds.slice(lo, hi + 1),
+      });
 
-    this.snapshot(recorder, line, {
-      type: "COMPARE",
-      title: `处理子数组 [${lo}..${hi}]`,
-      description: `对区间 [${lo}, ${hi}] 快速排序，选取基准元素 ${this.arr[hi]}`,
-      codeLine: line,
-      pseudoLine: 1,
-      targets: this.itemIds.slice(lo, hi + 1),
-    });
+      const pivotIdx = this.partition(lo, hi, recorder, line);
 
-    const pivotIdx = this.partition(lo, hi, recorder, line);
+      this.statuses[pivotIdx] = "highlighted";
+      for (let i = lo; i <= hi; i++) {
+        if (i !== pivotIdx && this.statuses[i] !== "highlighted") {
+          this.statuses[i] = "default";
+        }
+      }
 
-    this.statuses[pivotIdx] = "highlighted";
-    for (let i = lo; i <= hi; i++) {
-      if (i !== pivotIdx && this.statuses[i] !== "highlighted") {
-        this.statuses[i] = "default";
+      const leftSize = pivotIdx - lo;
+      const rightSize = hi - pivotIdx;
+      if (leftSize < rightSize) {
+        this.quickSort(lo, pivotIdx - 1, recorder, line);
+        lo = pivotIdx + 1;
+      } else {
+        this.quickSort(pivotIdx + 1, hi, recorder, line);
+        hi = pivotIdx - 1;
       }
     }
-
-    this.quickSort(lo, pivotIdx - 1, recorder, line);
-    this.quickSort(pivotIdx + 1, hi, recorder, line);
   }
 
   private partition(lo: number, hi: number, recorder: TraceRecorder, line: number): number {

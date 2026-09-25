@@ -31,7 +31,7 @@ export default function PlaybackControls({
   const displayStep = currentStep >= 0 ? currentStep + 1 : 0;
 
   return (
-    <div className="flex items-center gap-4 px-5 py-2.5 shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+    <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 min-w-0">
       <div className="flex items-center gap-1.5">
         <button
           onClick={onReset}

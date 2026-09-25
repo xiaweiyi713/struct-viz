@@ -25,6 +25,20 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
   const decorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
   const { isDark } = useSandboxStore();
   const [themeTransition, setThemeTransition] = useState(false);
+  // Monaco 加载状态：onMount 触发前为 loading；超时未触发则视为加载失败
+  const [editorFailed, setEditorFailed] = useState(false);
+  const [mountKey, setMountKey] = useState(0);
+
+  useEffect(() => {
+    // 挂载后 20 秒仍未 onMount 则判定加载失败；
+    // 与上方的主题过渡 effect 一样属于挂载时的一次性初始化。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEditorFailed(false);
+    const timer = setTimeout(() => {
+      if (!editorRef.current) setEditorFailed(true);
+    }, 20000);
+    return () => clearTimeout(timer);
+  }, [mountKey]);
 
   // 主题切换时短暂淡入淡出（响应 isDark 外部状态变化触发过渡动画）
   useEffect(() => {
@@ -37,6 +51,7 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
   const handleMount: OnMount = useCallback((ed, monaco) => {
     editorRef.current = ed;
     monacoRef.current = monaco;
+    setEditorFailed(false);
     if (!languageRegistered) {
       registerStructScriptLanguage(monaco);
       languageRegistered = true;
@@ -97,6 +112,11 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
     }
   }, [currentLine]);
 
+  // currentLine 变化时跟随高亮（此前只在用户输入时触发，播放时高亮不跟随）
+  useEffect(() => {
+    handleEditorDidUpdate();
+  }, [handleEditorDidUpdate]);
+
   // 在 value 变更后更新装饰
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -109,12 +129,34 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
     [onChange, handleEditorDidUpdate],
   );
 
+  if (editorFailed) {
+    return (
+      <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-center px-6">
+        <div className="text-4xl">📝</div>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          代码编辑器加载失败，可能是网络问题导致 Monaco 资源无法下载。
+        </p>
+        <button
+          onClick={() => {
+            editorRef.current = null;
+            monacoRef.current = null;
+            setMountKey((k) => k + 1);
+          }}
+          className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors"
+        >
+          重试加载
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div
       className="h-full w-full overflow-hidden transition-opacity duration-200"
       style={{ opacity: themeTransition ? 0.85 : 1 }}
     >
       <Editor
+        key={mountKey}
         height="100%"
         defaultLanguage="structscript"
         theme={isDark ? "vs-dark" : "light"}

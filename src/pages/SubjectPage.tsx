@@ -186,10 +186,19 @@ export default function SubjectPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredTemplates.map((template) => (
-              <button
+              <div
                 key={template.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => navigate(`/sandbox?template=${template.id}`)}
-                className="group text-left p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 hover:-translate-y-1 hover:border-indigo-400/40 hover:shadow-[0_12px_40px_rgba(99,102,241,0.12)] transition-all duration-300"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/sandbox?template=${template.id}`);
+                  }
+                }}
+                aria-label={`打开模板：${template.name}`}
+                className="group text-left p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 hover:-translate-y-1 hover:border-indigo-400/40 hover:shadow-[0_12px_40px_rgba(99,102,241,0.12)] transition-all duration-300 cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-4">
                   <span className={`px-3 py-1 rounded-md text-xs font-semibold ${difficultyClasses[template.difficulty]}`}>
@@ -227,7 +236,7 @@ export default function SubjectPage() {
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}

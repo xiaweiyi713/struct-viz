@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage, type StateStorage } from "zustand/middleware";
 import type { TraceFrame } from "../types";
 
 interface SandboxState {
@@ -211,6 +211,33 @@ export const useSandboxStore = create<SandboxState>()(
     }),
     {
       name: "struct-viz-sandbox",
+      // 隐私模式 / 存储配额耗尽时 localStorage 会抛错，兜底保证功能可用
+      storage: createJSONStorage((): StateStorage => {
+        const safe = {
+          getItem: (key: string): string | null => {
+            try {
+              return localStorage.getItem(key);
+            } catch {
+              return null;
+            }
+          },
+          setItem: (key: string, value: string): void => {
+            try {
+              localStorage.setItem(key, value);
+            } catch {
+              // 存储不可用时静默降级（内存态仍可正常使用）
+            }
+          },
+          removeItem: (key: string): void => {
+            try {
+              localStorage.removeItem(key);
+            } catch {
+              // ignore
+            }
+          },
+        };
+        return safe;
+      }),
       partialize: (state) => ({
         code: state.code,
         selectedTemplate: state.selectedTemplate,

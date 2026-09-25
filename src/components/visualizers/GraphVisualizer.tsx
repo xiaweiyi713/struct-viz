@@ -42,6 +42,8 @@ export default function GraphVisualizer({
   const simNodesRef = useRef<Map<string, SimNode>>(new Map());
   const prevNodeIdsRef = useRef<Set<string>>(new Set());
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  // 记录用户当前的缩放/平移，重建仿真时恢复，避免视角跳变
+  const zoomTransformRef = useRef<d3.ZoomTransform | null>(null);
 
   // 清理仿真
   useEffect(() => {
@@ -121,9 +123,14 @@ export default function GraphVisualizer({
     const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 4])
       .on("zoom", (event) => {
+        zoomTransformRef.current = event.transform;
         g.attr("transform", event.transform.toString());
       });
     d3svg.call(zoomBehavior);
+    // 重建时恢复用户之前的缩放/平移，避免视角跳回原点
+    if (zoomTransformRef.current) {
+      d3svg.call(zoomBehavior.transform, zoomTransformRef.current);
+    }
     zoomRef.current = zoomBehavior;
 
     // 边

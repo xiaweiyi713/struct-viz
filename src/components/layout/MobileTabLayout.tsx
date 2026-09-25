@@ -15,7 +15,7 @@ interface MobileTabLayoutProps {
 export default function MobileTabLayout({ tabs, children }: MobileTabLayoutProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [direction, setDirection] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number; interactive: boolean } | null>(null);
 
   const switchTab = (next: number) => {
     if (next === activeTab || next < 0 || next >= tabs.length) return;
@@ -27,14 +27,26 @@ export default function MobileTabLayout({ tabs, children }: MobileTabLayoutProps
     <div className="flex flex-col flex-1 min-h-0 md:hidden">
       <div
         className="flex-1 min-h-0 overflow-hidden"
-        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchStart={(e) => {
+          const target = e.target as HTMLElement;
+          // D3 画布 / Monaco 编辑器内部的手势归它们自己处理，不触发切 Tab
+          const interactive = !!target.closest("svg, canvas, .monaco-editor, [data-noswipe]");
+          touchStart.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+            interactive,
+          };
+        }}
         onTouchEnd={(e) => {
-          if (touchStartX.current === null) return;
-          const diff = e.changedTouches[0].clientX - touchStartX.current;
-          if (Math.abs(diff) > 60) {
-            switchTab(diff > 0 ? activeTab - 1 : activeTab + 1);
+          const start = touchStart.current;
+          touchStart.current = null;
+          if (!start || start.interactive) return;
+          const dx = e.changedTouches[0].clientX - start.x;
+          const dy = e.changedTouches[0].clientY - start.y;
+          // 明确的水平滑动才切 Tab，避免竖向滚动误触
+          if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            switchTab(dx > 0 ? activeTab - 1 : activeTab + 1);
           }
-          touchStartX.current = null;
         }}
       >
         <AnimatePresence mode="wait" initial={false}>

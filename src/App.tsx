@@ -1,9 +1,11 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const SubjectPage = lazy(() => import("./pages/SubjectPage"));
 const SandboxPage = lazy(() => import("./pages/SandboxPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function LoadingFallback() {
   return (
@@ -19,18 +21,23 @@ function LoadingFallback() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Suspense fallback={<LoadingFallback />}><HomePage /></Suspense>} />
-        <Route path="/subject/:subjectId" element={<Suspense fallback={<LoadingFallback />}><SubjectPage /></Suspense>} />
-        <Route
-          path="/sandbox"
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <SandboxPage />
-            </Suspense>
-          }
-        />
-      </Routes>
+      <ErrorBoundary label="应用">
+        <Routes>
+          <Route path="/" element={<Suspense fallback={<LoadingFallback />}><HomePage /></Suspense>} />
+          <Route path="/subject/:subjectId" element={<Suspense fallback={<LoadingFallback />}><SubjectPage /></Suspense>} />
+          <Route
+            path="/sandbox"
+            element={
+              <ErrorBoundary label="沙盒">
+                <Suspense fallback={<LoadingFallback />}>
+                  <SandboxPage />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+          <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFoundPage /></Suspense>} />
+        </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

@@ -211,6 +211,7 @@ export default function SandboxPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const [parseErrors, setParseErrors] = useState<{ line: number; column: number; message: string }[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isCompareRunning, setIsCompareRunning] = useState(false);
   const [compareErrors, setCompareErrors] = useState<string[]>([]);
   const [compareParseErrors, setCompareParseErrors] = useState<{ line: number; column: number; message: string }[]>([]);
   const [compareDropdownOpen, setCompareDropdownOpen] = useState(false);
@@ -221,16 +222,27 @@ export default function SandboxPage() {
   const visualSize = useVisualSize(visualAreaRef);
   const compareVisualSize = useVisualSize(compareVisualRef);
 
-  // 对比模板下拉外部点击关闭
+  // 对比模板下拉外部点击 / Esc 关闭
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (compareDropdownRef.current && !compareDropdownRef.current.contains(e.target as Node)) {
         setCompareDropdownOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape" && compareDropdownOpen) {
+        setCompareDropdownOpen(false);
+        // 关闭时焦点回到触发按钮
+        compareDropdownRef.current?.querySelector("button")?.focus();
+      }
+    }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [compareDropdownOpen]);
 
   const handleSelectCompareTemplate = useCallback((templateId: string) => {
     const t = templates.find((t) => t.id === templateId);
@@ -242,6 +254,8 @@ export default function SandboxPage() {
       setCompareParseErrors([]);
     }
     setCompareDropdownOpen(false);
+    // 选中后焦点回到触发按钮，避免焦点掉到 body
+    compareDropdownRef.current?.querySelector("button")?.focus();
   }, [setCompareTemplate, setCompareCode, compareReset]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -269,6 +283,9 @@ export default function SandboxPage() {
         setErrors([]);
         setParseErrors([]);
         addRecent(templateId);
+      } else {
+        // 非法模板 id：给出提示而不是静默忽略
+        setErrors([`URL 中的模板 "${templateId}" 不存在，已加载默认代码`]);
       }
     }
   }, [searchParams, setCode, setTemplate, reset, addRecent]);
@@ -331,7 +348,9 @@ export default function SandboxPage() {
   const handleCompareRun = useCallback(async () => {
     setCompareErrors([]);
     setCompareParseErrors([]);
+    setIsCompareRunning(true);
     const result = await compareWorkerExecute.execute(compareCode);
+    setIsCompareRunning(false);
     if (result.errors) {
       setCompareErrors(result.errors);
       setCompareParseErrors(result.parseErrors ?? []);
@@ -488,6 +507,9 @@ export default function SandboxPage() {
         <div className="relative" ref={compareDropdownRef}>
           <button
             onClick={() => setCompareDropdownOpen(!compareDropdownOpen)}
+            aria-haspopup="listbox"
+            aria-expanded={compareDropdownOpen}
+            aria-label="选择对比模板"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-violet-600 dark:text-violet-400 hover:border-violet-400/40 transition-all"
           >
             <span>{activeCompareTemplate ? activeCompareTemplate.name : "选择模板"}</span>
@@ -538,12 +560,22 @@ export default function SandboxPage() {
         </div>
         <button
           onClick={handleCompareRun}
-          className="px-4 py-1.5 rounded-lg text-xs font-medium text-white bg-gradient-to-r from-violet-500 to-purple-500 hover:shadow-[0_4px_15px_rgba(139,92,246,0.3)] transition-all flex items-center gap-1.5 shrink-0"
+          disabled={isCompareRunning}
+          className={`px-4 py-1.5 rounded-lg text-xs font-medium text-white flex items-center gap-1.5 shrink-0 transition-all ${isCompareRunning
+            ? "bg-slate-400 cursor-wait"
+            : "bg-gradient-to-r from-violet-500 to-purple-500 hover:shadow-[0_4px_15px_rgba(139,92,246,0.3)]"}`}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-          运行
+          {isCompareRunning ? (
+            <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" strokeOpacity="0.3" />
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+          ) : (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          )}
+          {isCompareRunning ? "执行中" : "运行"}
         </button>
       </div>
       <div className="flex-1 min-h-0">
@@ -653,7 +685,8 @@ export default function SandboxPage() {
             <span className="opacity-75">（共 {(errors.length || 0) + (compareErrors.length || 0)} 个错误）</span>
           )}
           <button
-            className="ml-auto opacity-75 hover:opacity-100"
+            className="ml-auto p-1.5 -m-1.5 opacity-75 hover:opacity-100"
+            aria-label="关闭错误提示"
             onClick={() => { setErrors([]); setCompareErrors([]); }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -691,8 +724,8 @@ export default function SandboxPage() {
 
       {/* 底部：播放控制 */}
       {compareMode ? (
-        <div className="flex border-t border-slate-200 dark:border-slate-800">
-          <div className="flex-1">
+        <div className="flex flex-col md:flex-row shrink-0">
+          <div className="flex-1 min-w-0">
             <PlaybackControls
               currentStep={currentStep}
               totalSteps={total}
@@ -707,8 +740,8 @@ export default function SandboxPage() {
               onSpeedChange={setSpeed}
             />
           </div>
-          <div className="w-px bg-slate-200 dark:bg-slate-800" />
-          <div className="flex-1">
+          <div className="h-px md:h-auto md:w-px bg-slate-200 dark:bg-slate-800" />
+          <div className="flex-1 min-w-0">
             <PlaybackControls
               currentStep={compareCurrentStep}
               totalSteps={compareTotal}

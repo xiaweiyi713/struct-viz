@@ -23,7 +23,11 @@ export class KMPRuntime implements StructureRuntime {
     line: number,
   ): void {
     if (method !== "match") throw new Error(`KMP 不支持方法 "${method}"`);
-    this.doMatch(String(args[0]), String(args[1]), recorder, line);
+    if (args.length < 2) throw new Error(`match 需要 2 个参数: match(主串, 模式串)`);
+    const text = String(args[0]);
+    const pattern = String(args[1]);
+    if (pattern.length === 0) throw new Error(`模式串不能为空`);
+    this.doMatch(text, pattern, recorder, line);
   }
 
   getSnapshot(): VisualStructure {

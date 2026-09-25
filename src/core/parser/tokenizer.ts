@@ -17,6 +17,18 @@ export interface Token {
   column: number;
 }
 
+/** 词法错误：携带行列号，parse() 会捕获并转为 ParseError */
+export class LexError extends Error {
+  line: number;
+  column: number;
+  constructor(line: number, column: number, message: string) {
+    super(message);
+    this.name = "LexError";
+    this.line = line;
+    this.column = column;
+  }
+}
+
 export function tokenize(input: string): Token[] {
   const tokens: Token[] = [];
   let pos = 0;
@@ -119,16 +131,24 @@ export function tokenize(input: string): Token[] {
       if (pos < input.length) {
         pos++; // 跳过结尾引号
         column++;
+      } else {
+        // 到达输入末尾仍未见到闭合引号：明确报错，而不是吞掉剩余输入
+        throw new LexError(startLine, startCol, `字符串未闭合：缺少 ${quote} 引号`);
       }
       tokens.push({ type: "STRING", value, line: startLine, column: startCol });
       continue;
     }
 
-    // 负数字面量：'-' 后跟数字，且前一个 token 是 LPAREN/COMMA/无
-    if (ch === "-" && pos + 1 < input.length && /[0-9]/.test(input[pos + 1])) {
+    // 负号：StructScript 没有减法运算符，'-' 只允许作为负数字面量的一部分，
+    // 且只能出现在开头、左括号或逗号之后。其他位置的 '-' 直接报错，
+    // 避免静默丢弃导致语义改变（如 insert(3-5) 被误解析为 insert(3, 5)）。
+    if (ch === "-") {
+      const startCol = column;
+      const nextIsDigit = pos + 1 < input.length && /[0-9]/.test(input[pos + 1]);
       const lastToken = tokens.length > 0 ? tokens[tokens.length - 1] : null;
-      if (!lastToken || lastToken.type === "LPAREN" || lastToken.type === "COMMA") {
-        const startCol = column;
+      const validPosition =
+        !lastToken || lastToken.type === "LPAREN" || lastToken.type === "COMMA";
+      if (nextIsDigit && validPosition) {
         let value = "-";
         pos++; column++;
         while (pos < input.length && /[0-9]/.test(input[pos])) {
@@ -147,6 +167,13 @@ export function tokenize(input: string): Token[] {
         tokens.push({ type: "NUMBER", value, line, column: startCol });
         continue;
       }
+      throw new LexError(
+        line,
+        startCol,
+        nextIsDigit
+          ? "负号位置非法：'-' 只能出现在代码开头、'(' 或 ',' 之后"
+          : "无法识别的字符 '-'（StructScript 不支持减法运算）",
+      );
     }
 
     // 数字字面量（支持浮点数）
@@ -184,9 +211,8 @@ export function tokenize(input: string): Token[] {
       continue;
     }
 
-    // 无法识别的字符，跳过
-    pos++;
-    column++;
+    // 无法识别的字符：直接报错并携带行列号，不再静默跳过
+    throw new LexError(line, column, `无法识别的字符 '${ch}'`);
   }
 
   tokens.push({ type: "EOF", value: "", line, column });

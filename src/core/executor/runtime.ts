@@ -5,7 +5,7 @@ import type {
   VisualStructure,
   RuntimeValue,
 } from "../../types";
-import { TraceRecorder, type SnapshotProvider } from "./traceRecorder";
+import { TraceRecorder, FrameLimitExceededError, type SnapshotProvider } from "./traceRecorder";
 
 // ── StructureRuntime 接口 ──
 
@@ -43,6 +43,8 @@ export class Runtime {
   private classFactories = new Map<string, StructureFactory>();
   private recorder: TraceRecorder;
   private errors: string[] = [];
+  /** 致命错误（如帧数超限）发生后停止执行后续语句，避免错误刷屏 */
+  private fatalError = false;
 
   constructor() {
     this.recorder = new TraceRecorder(this.buildSnapshotProvider());
@@ -79,6 +81,11 @@ export class Runtime {
       const instance = factory(args);
       this.structures.set(varName, instance);
     } catch (e) {
+      if (e instanceof FrameLimitExceededError) {
+        this.errors.push(`第 ${line} 行: ${e.message}`);
+        this.fatalError = true;
+        return;
+      }
       this.errors.push(
         `第 ${line} 行: 创建 ${className} 失败 — ${e instanceof Error ? e.message : String(e)}`,
       );
@@ -103,6 +110,12 @@ export class Runtime {
     try {
       instance.executeMethod(method, args, this.recorder, line);
     } catch (e) {
+      if (e instanceof FrameLimitExceededError) {
+        // 帧数超限是致命错误：记录一次并停止后续语句
+        this.errors.push(`第 ${line} 行: ${e.message}`);
+        this.fatalError = true;
+        return;
+      }
       this.errors.push(
         `第 ${line} 行: ${target}.${method}() 执行失败 — ${e instanceof Error ? e.message : String(e)}`,
       );
@@ -113,9 +126,11 @@ export class Runtime {
   execute(program: Program): ExecutionResult {
     this.structures.clear();
     this.errors = [];
+    this.fatalError = false;
     this.recorder.reset();
 
     for (const stmt of program.body) {
+      if (this.fatalError) break;
       switch (stmt.type) {
         case "Declaration":
           this.declare(stmt.className, stmt.variableName, stmt.args, stmt.line);

@@ -55,7 +55,10 @@ export class HuffmanTreeRuntime implements StructureRuntime {
     line: number,
   ): void {
     if (method !== "build") throw new Error(`Huffman 不支持方法 "${method}"`);
-    this.doBuild(args.map((a) => Number(a)), recorder, line);
+    const weights = args.map((a) => Number(a));
+    if (weights.length === 0) throw new Error(`build 需要至少 1 个权值参数: build(w1, w2, ...)`);
+    if (weights.some((w) => Number.isNaN(w))) throw new Error(`权值必须为数字`);
+    this.doBuild(weights, recorder, line);
   }
 
   getSnapshot(): VisualStructure {

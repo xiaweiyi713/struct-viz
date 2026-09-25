@@ -71,11 +71,6 @@ export default function MatrixVisualizer({
   const offsetX = headerW + Math.max(0, (availW - totalW) / 2);
   const offsetY = headerH + Math.max(0, (availH - totalH) / 2);
 
-  const cellMap = new Map<string, VisualMatrixCell>();
-  for (const c of cells) {
-    cellMap.set(`${c.row}-${c.col}`, c);
-  }
-
   return (
     <div className="relative" style={{ width, height, overflow: "auto" }}>
       {/* Column headers */}

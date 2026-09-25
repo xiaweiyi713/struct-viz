@@ -38,7 +38,10 @@ export default function StringVisualizer({
 
   const cellSize = Math.min(44, Math.max(28, (width - 40) / (textChars.length + 2)));
   const gap = 2;
-  const startX = (width - textChars.length * (cellSize + gap)) / 2;
+  // 长字符串时允许横向滚动：内容宽度超出可视宽度时内层撑开，外层滚动
+  const contentW = textChars.length * (cellSize + gap) + 40;
+  const innerW = Math.max(width, contentW);
+  const startX = (innerW - textChars.length * (cellSize + gap)) / 2;
 
   // 匹配窗口起始位置
   const matchStart = textIndex - patternIndex;
@@ -51,7 +54,8 @@ export default function StringVisualizer({
   const nextY = patternY + cellSize + 50;
 
   return (
-    <div className="relative overflow-hidden" style={{ width, height }}>
+    <div className="overflow-x-auto overflow-y-hidden" style={{ width, height }}>
+      <div className="relative" style={{ width: innerW, height }}>
       {/* 标题标签 */}
       <div className="absolute left-4 top-4 flex gap-6 text-xs" style={{ color: "var(--text-muted)" }}>
         <span>主串 (text)</span>
@@ -182,6 +186,7 @@ export default function StringVisualizer({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -111,7 +111,7 @@ export default function HashTableVisualizer({
                           layout
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="flex items-center justify-center rounded font-mono text-sm font-semibold"
+                          className="flex items-center justify-center rounded font-mono text-sm font-semibold relative"
                           style={{
                             width: entryWidth,
                             height: rowHeight - 12,

@@ -35,6 +35,7 @@ export default function ExamQuestion({ data }: ExamQuestionProps) {
     <div className="rounded-lg bg-indigo-500/5 overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
         className="w-full flex items-center gap-2 text-xs py-2.5 px-3 text-left hover:bg-indigo-500/10 transition-colors"
       >
         <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold tabular-nums shrink-0">

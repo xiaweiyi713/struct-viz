@@ -11,7 +11,10 @@
     <meta property="og:title" content="Struct-Viz - 408 考研四科算法可视化平台" />
     <meta property="og:description" content="输入类 C++ 伪代码，逐步动画演示数据结构与算法的执行全过程。111 个算法模板，覆盖 408 四科。" />
     <meta property="og:url" content="https://tourmaline-sable-9c8eb5.netlify.app" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://tourmaline-sable-9c8eb5.netlify.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Struct-Viz - 408 考研四科算法可视化平台" />
     <meta name="twitter:description" content="输入类 C++ 伪代码，逐步动画演示数据结构与算法的执行全过程。" />
     <title>Struct-Viz - 408 考研四科可视化平台</title>
@@ -37,6 +40,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:#e2e8f0;font-family:system-ui,sans-serif;padding:24px;text-align:center">
+        <div>
+          <h1 style="font-size:24px;margin-bottom:12px">Struct-Viz</h1>
+          <p>408 考研四科算法可视化平台需要启用 JavaScript 才能运行。</p>
+          <p style="opacity:0.7;font-size:14px">请开启浏览器的 JavaScript 后刷新页面。</p>
+        </div>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
