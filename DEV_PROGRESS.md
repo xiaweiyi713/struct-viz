@@ -18,7 +18,7 @@ Struct-Viz 是一个面向 408 考研的四科可视化平台，使用 React + T
 - **代码分割**: 首页/SandboxPage 独立 chunk + Web Worker
 - **持久化**: Zustand persist（代码/主题/速度保存到 localStorage）
 - **暗色模式**: 全部可视化器 + 滚动条 + Range 输入已完成适配
-- **部署**: Netlify（https://tourmaline-sable-9c8eb5.netlify.app）
+- **部署**: Netlify（https://lucent-kheer-af0ac0.netlify.app）
 - **仓库**: GitHub（https://github.com/xiaweiyi713/struct-viz）
 
 ## 四科覆盖
@@ -113,7 +113,7 @@ Struct-Viz 是一个面向 408 考研的四科可视化平台，使用 React + T
 
 ### 部署上线 (2026-05-26)
 
-- Netlify 部署：https://tourmaline-sable-9c8eb5.netlify.app
+- Netlify 部署：https://lucent-kheer-af0ac0.netlify.app
 - GitHub 仓库：https://github.com/xiaweiyi713/struct-viz
 - `netlify.toml` 配置 SPA 路由重定向
 - 构建 script 分离：`build` = `vite build`，`typecheck` = `tsc -b`

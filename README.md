@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38BDF8?logo=tailwindcss&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-164%20passed-3FB950)
 
-[🚀 在线体验](https://tourmaline-sable-9c8eb5.netlify.app) · [📦 源码仓库](https://github.com/xiaweiyi713/struct-viz)
+[🚀 在线体验](https://lucent-kheer-af0ac0.netlify.app) · [📦 源码仓库](https://github.com/xiaweiyi713/struct-viz)
 
 </div>
 
@@ -83,7 +83,7 @@ g.addEdge(3, 4, 4);
 g.dijkstra(0);
 ```
 
-> 💡 在[沙盒页](https://tourmaline-sable-9c8eb5.netlify.app/sandbox)从模板下拉框选择任意算法，即可载入示例代码并一键运行。
+> 💡 在[沙盒页](https://lucent-kheer-af0ac0.netlify.app/sandbox)从模板下拉框选择任意算法，即可载入示例代码并一键运行。
 
 ## 🛠️ 技术栈
 
