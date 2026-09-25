@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-import Editor, { type OnMount } from "@monaco-editor/react";
+import Editor, { loader, type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useSandboxStore } from "../../stores/sandboxStore";
 import { registerStructScriptLanguage } from "./structscriptLanguage";
@@ -34,10 +34,19 @@ export default function CodeEditor({ code, onChange, currentLine, parseErrors }:
     // 与上方的主题过渡 effect 一样属于挂载时的一次性初始化。
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEditorFailed(false);
+    // loader.init() 返回共享的加载 promise：CDN 被墙/资源 404 时会直接 reject，
+    // 立刻显示失败 UI，不必等 20 秒超时
+    let cancelled = false;
+    loader.init().catch(() => {
+      if (!cancelled) setEditorFailed(true);
+    });
     const timer = setTimeout(() => {
       if (!editorRef.current) setEditorFailed(true);
     }, 20000);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [mountKey]);
 
   // 主题切换时短暂淡入淡出（响应 isDark 外部状态变化触发过渡动画）

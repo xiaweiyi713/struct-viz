@@ -25,6 +25,7 @@ export default function TopNav() {
   const [subjectTab, setSubjectTab] = useState<"all" | Subject>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -39,6 +40,8 @@ export default function TopNav() {
         setDropdownOpen(false);
         setSubjectTab("all");
         setSearchQuery("");
+        // 焦点回到触发按钮，键盘用户关闭后不丢失位置
+        toggleButtonRef.current?.focus();
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -125,6 +128,7 @@ export default function TopNav() {
         ) : (
           <div className="relative" ref={dropdownRef}>
             <button
+              ref={toggleButtonRef}
               className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400/40 transition-all"
               onClick={toggleDropdown}
               aria-haspopup="listbox"

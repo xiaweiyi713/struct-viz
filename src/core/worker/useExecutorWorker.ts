@@ -32,24 +32,48 @@ export function useExecutorWorker() {
     pending.resolve(result);
   }, []);
 
+  // 销毁 worker 并置空，下次 execute 会重建一个干净的实例
+  const destroyWorker = useCallback(() => {
+    workerRef.current?.terminate();
+    workerRef.current = null;
+  }, []);
+
   const getWorker = useCallback(() => {
     if (!workerRef.current) {
       const worker = new Worker(
         new URL("./executorWorker.ts", import.meta.url),
         { type: "module" },
       );
-      // worker 内部抛错（如模块加载失败）时，未完成的请求不能永久悬挂
+      // 集中式消息分发：按 requestId 路由到对应的 pending 请求。
+      // 每个 worker 只挂载一次，避免每次 execute 都 add/removeEventListener。
+      worker.onmessage = (e: MessageEvent) => {
+        const data = e.data;
+        if (!data || typeof data.requestId !== "number") return;
+        const requestId: number = data.requestId;
+        if (data.type === "success") {
+          settlePending(requestId, { frames: data.frames });
+        } else if (data.type === "parse-error") {
+          settlePending(requestId, {
+            errors: data.errors,
+            parseErrors: data.parseErrors,
+          });
+        } else if (data.type === "exec-error") {
+          settlePending(requestId, { errors: data.errors });
+        }
+      };
+      // worker 内部抛错（如模块加载失败）后销毁重建，未完成的请求不能永久悬挂
       worker.onerror = () => {
         for (const [requestId] of pendingRef.current) {
           settlePending(requestId, {
             errors: ["执行器发生内部错误，请重试"],
           });
         }
+        destroyWorker();
       };
       workerRef.current = worker;
     }
     return workerRef.current;
-  }, [settlePending]);
+  }, [settlePending, destroyWorker]);
 
   const execute = useCallback(
     (code: string): Promise<WorkerResult> =>
@@ -59,33 +83,18 @@ export function useExecutorWorker() {
         const requestId = requestIdRef.current;
 
         const timer = window.setTimeout(() => {
+          // 超时后销毁 worker：卡死的执行会一直占用它，
+          // 不销毁会导致后续 execute 也排队等待同一个坏 worker
+          destroyWorker();
           settlePending(requestId, {
             errors: ["执行超时（30 秒），请减小输入规模后重试"],
           });
         }, EXECUTE_TIMEOUT_MS);
         pendingRef.current.set(requestId, { resolve, timer });
 
-        const handler = (e: MessageEvent) => {
-          const data = e.data;
-          // 只处理与本次请求匹配的回包，避免并发 execute 错配
-          if (data.requestId !== requestId) return;
-          worker.removeEventListener("message", handler);
-          if (data.type === "success") {
-            settlePending(requestId, { frames: data.frames });
-          } else if (data.type === "parse-error") {
-            settlePending(requestId, {
-              errors: data.errors,
-              parseErrors: data.parseErrors,
-            });
-          } else if (data.type === "exec-error") {
-            settlePending(requestId, { errors: data.errors });
-          }
-        };
-
-        worker.addEventListener("message", handler);
         worker.postMessage({ code, requestId });
       }),
-    [getWorker, settlePending],
+    [getWorker, settlePending, destroyWorker],
   );
 
   const terminate = useCallback(() => {
@@ -93,9 +102,8 @@ export function useExecutorWorker() {
     for (const [requestId] of pendingRef.current) {
       settlePending(requestId, { errors: ["执行已被取消"] });
     }
-    workerRef.current?.terminate();
-    workerRef.current = null;
-  }, [settlePending]);
+    destroyWorker();
+  }, [settlePending, destroyWorker]);
 
   // 组件卸载时自动清理 worker
   useEffect(() => {
@@ -104,10 +112,9 @@ export function useExecutorWorker() {
       for (const [requestId] of pending) {
         settlePending(requestId, { errors: ["执行已被取消"] });
       }
-      workerRef.current?.terminate();
-      workerRef.current = null;
+      destroyWorker();
     };
-  }, [settlePending]);
+  }, [settlePending, destroyWorker]);
 
   return { execute, terminate };
 }
