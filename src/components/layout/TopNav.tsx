@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSandboxStore } from "../../stores/sandboxStore";
-import { templates } from "../../data/templates";
-import { subjects } from "../../data/subjects";
+import { templates, type AlgorithmTemplate } from "../../data/templates";
+import { subjects, type Subject } from "../../data/subjects";
 
 const difficultyClasses: Record<string, string> = {
   easy: "bg-emerald-500/10 text-emerald-500",
@@ -22,17 +22,31 @@ export default function TopNav() {
   const isHome = location.pathname === "/";
   const { isDark, toggleTheme, setTemplate, selectedTemplate, setCode } = useSandboxStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [subjectTab, setSubjectTab] = useState<"all" | Subject>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+        setSubjectTab("all");
+        setSearchQuery("");
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const resetDropdownFilter = () => {
+    setSubjectTab("all");
+    setSearchQuery("");
+  };
+
+  const toggleDropdown = () => {
+    if (dropdownOpen) resetDropdownFilter();
+    setDropdownOpen(!dropdownOpen);
+  };
 
   const handleSelectTemplate = (templateId: string) => {
     const template = templates.find((t) => t.id === templateId);
@@ -40,10 +54,33 @@ export default function TopNav() {
       setTemplate(templateId);
       setCode(template.code);
     }
+    resetDropdownFilter();
     setDropdownOpen(false);
   };
 
   const activeTemplate = templates.find((t) => t.id === selectedTemplate);
+
+  // 科目 Tab + 搜索过滤后的模板分组
+  const query = searchQuery.trim().toLowerCase();
+  const matchQuery = (t: AlgorithmTemplate) =>
+    query === "" ||
+    t.name.toLowerCase().includes(query) ||
+    t.nameEn.toLowerCase().includes(query) ||
+    t.description.toLowerCase().includes(query);
+  const visibleSubjects = subjectTab === "all" ? subjects : subjects.filter((s) => s.id === subjectTab);
+  const filteredGroups = visibleSubjects
+    .map((subject) => ({
+      subject,
+      list: templates.filter((t) => t.subject === subject.id && matchQuery(t)),
+    }))
+    .filter((g) => g.list.length > 0);
+
+  const tabClass = (id: "all" | Subject) =>
+    `shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+      subjectTab === id
+        ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"
+        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+    }`;
 
   return (
     <>
@@ -78,7 +115,7 @@ export default function TopNav() {
           <div className="relative" ref={dropdownRef}>
             <button
               className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400/40 transition-all"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+              onClick={toggleDropdown}
             >
               <span>{activeTemplate ? activeTemplate.name : "选择算法模板"}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}>
@@ -87,56 +124,76 @@ export default function TopNav() {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-96 rounded-xl z-50 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
-                <div className="max-h-[70vh] overflow-y-auto py-1">
-                  {subjects.map((subject) => {
-                    const subjectTemplates = templates.filter((t) => t.subject === subject.id);
-                    if (subjectTemplates.length === 0) return null;
-                    return (
-                      <div key={subject.id}>
-                        <div className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wider ${subject.text}`}>
-                          {subject.icon} {subject.name}
-                        </div>
-                        {subject.categories.map((cat) => {
-                          const catTemplates = subjectTemplates.filter((t) => t.category === cat.key);
-                          if (catTemplates.length === 0) return null;
-                          return (
-                            <div key={cat.key}>
-                              <div className="px-6 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                                {cat.label}
-                              </div>
-                              {catTemplates.map((template) => (
-                                <button
-                                  key={template.id}
-                                  className={`w-full text-left px-6 py-3 flex items-start gap-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedTemplate === template.id ? "bg-slate-50 dark:bg-slate-800/50" : ""}`}
-                                  onClick={() => handleSelectTemplate(template.id)}
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                                      {template.name}
-                                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${difficultyClasses[template.difficulty]}`}>
-                                        {difficultyLabel[template.difficulty]}
-                                      </span>
-                                    </div>
-                                    <div className="text-xs mt-1 truncate text-slate-400 dark:text-slate-500">
-                                      {template.description}
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-0.5 shrink-0 mt-1">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                      <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i < template.examFrequency ? "#f59e0b" : "#e2e8f0"}>
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                      </svg>
-                                    ))}
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          );
-                        })}
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] rounded-xl z-50 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
+                {/* 搜索 + 科目 Tab 筛选 */}
+                <div className="border-b border-slate-200 dark:border-slate-800 px-3 pt-3 pb-2">
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="搜索模板名称或描述…"
+                    className="w-full px-3 py-2 rounded-lg text-sm bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-400/50 focus:outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  />
+                  <div className="flex gap-1.5 mt-2 overflow-x-auto pb-0.5">
+                    <button onClick={() => setSubjectTab("all")} className={tabClass("all")}>
+                      全部
+                    </button>
+                    {subjects.map((s) => (
+                      <button key={s.id} onClick={() => setSubjectTab(s.id)} className={tabClass(s.id)}>
+                        {s.icon} {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto py-1">
+                  {filteredGroups.map(({ subject, list }) => (
+                    <div key={subject.id}>
+                      <div className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wider ${subject.text}`}>
+                        {subject.icon} {subject.name}
                       </div>
-                    );
-                  })}
+                      {subject.categories.map((cat) => {
+                        const catTemplates = list.filter((t) => t.category === cat.key);
+                        if (catTemplates.length === 0) return null;
+                        return (
+                          <div key={cat.key}>
+                            <div className="px-6 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                              {cat.label}
+                            </div>
+                            {catTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`w-full text-left px-6 py-3 flex items-start gap-3 transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedTemplate === template.id ? "bg-slate-50 dark:bg-slate-800/50" : ""}`}
+                                onClick={() => handleSelectTemplate(template.id)}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                                    {template.name}
+                                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${difficultyClasses[template.difficulty]}`}>
+                                      {difficultyLabel[template.difficulty]}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs mt-1 truncate text-slate-400 dark:text-slate-500">
+                                    {template.description}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-0.5 shrink-0 mt-1">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <svg key={i} width="10" height="10" viewBox="0 0 24 24" fill={i < template.examFrequency ? "#f59e0b" : "#e2e8f0"}>
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                  ))}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                  {filteredGroups.length === 0 && (
+                    <div className="px-4 py-10 text-center text-sm text-slate-400 dark:text-slate-500">
+                      没有找到匹配「{searchQuery.trim()}」的模板
+                    </div>
+                  )}
                 </div>
               </div>
             )}
