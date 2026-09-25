@@ -1,10 +1,39 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Struct-Viz —— 面向 408 考研的四科算法可视化平台。输入类 C++ 伪代码，逐步动画演示数据结构与算法的执行全过程，覆盖数据结构、组成原理、操作系统、计算机网络 111 个算法模板。" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Struct-Viz - 408 考研四科算法可视化平台" />
+    <meta property="og:description" content="输入类 C++ 伪代码，逐步动画演示数据结构与算法的执行全过程。111 个算法模板，覆盖 408 四科。" />
+    <meta property="og:url" content="https://tourmaline-sable-9c8eb5.netlify.app" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Struct-Viz - 408 考研四科算法可视化平台" />
+    <meta name="twitter:description" content="输入类 C++ 伪代码，逐步动画演示数据结构与算法的执行全过程。" />
     <title>Struct-Viz - 408 考研四科可视化平台</title>
+    <script>
+      // 首屏前恢复主题：避免暗色模式刷新后闪烁 / 与按钮状态错乱
+      (function () {
+        try {
+          var raw = localStorage.getItem("struct-viz-sandbox");
+          var dark = null;
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && parsed.state && typeof parsed.state.isDark === "boolean") {
+              dark = parsed.state.isDark;
+            }
+          }
+          if (dark === null) {
+            dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          }
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

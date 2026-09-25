@@ -138,9 +138,10 @@ export default function HomePage() {
             覆盖数据结构、组成原理、操作系统、计算机网络四大科目，逐步动画展示
           </p>
 
-          {/* 开始实验按钮 */}
+          {/* 开始实验按钮（hover 时预加载沙盒页 chunk，点击更快） */}
           <button
             onClick={() => navigate("/sandbox")}
+            onMouseEnter={() => import("./SandboxPage")}
             className="px-8 py-3.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold text-base hover:bg-white/30 hover:scale-105 active:scale-95 transition-all duration-200 mb-12 cursor-pointer"
           >
             开始实验

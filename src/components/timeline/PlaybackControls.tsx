@@ -38,6 +38,7 @@ export default function PlaybackControls({
           disabled={!hasFrames}
           className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 transition-colors"
           title="重置"
+          aria-label="重置"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
@@ -49,6 +50,7 @@ export default function PlaybackControls({
           disabled={!hasFrames || currentStep <= 0}
           className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 transition-colors"
           title="上一步"
+          aria-label="上一步"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
@@ -64,6 +66,7 @@ export default function PlaybackControls({
               : "bg-slate-200 dark:bg-slate-700"
           }`}
           title={isPlaying ? "暂停" : "播放"}
+          aria-label={isPlaying ? "暂停" : "播放"}
         >
           {isPlaying ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -81,6 +84,7 @@ export default function PlaybackControls({
           disabled={!hasFrames || currentStep >= totalSteps - 1}
           className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 transition-colors"
           title="下一步"
+          aria-label="下一步"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
@@ -96,6 +100,7 @@ export default function PlaybackControls({
           value={currentStep >= 0 ? currentStep : 0}
           onChange={(e) => onGoToStep(Number(e.target.value))}
           disabled={!hasFrames}
+          aria-label="播放进度"
           className="w-full disabled:opacity-25 disabled:cursor-not-allowed"
           style={{
             background: hasFrames
