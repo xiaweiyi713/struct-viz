@@ -223,7 +223,7 @@ function expectBPlusTree(nodes: TreeNodes, rootId: string, t: number, expectedKe
   while (cur) {
     if (seen.has(cur)) throw new Error("B+ leaf linked list has a cycle");
     seen.add(cur);
-    const n = nodes[cur];
+    const n: VisualTreeNode = nodes[cur];
     const keys = nodeKeys(n);
     expect(keys, `B+ leaf ${cur} keys sorted`).toEqual([...keys].sort((a, b) => a - b));
     seq.push(...keys);
@@ -279,7 +279,7 @@ function expectSearchOutcome(r: ExecResult, id: string, key: string | number, fo
 }
 
 /** 从根经 parent 链计算叶子深度；返回 WPL = Σ weight × depth */
-function huffmanWPL(nodes: TreeNodes, rootId: string): { wpl: number; leaves: { key: string; weight: number; depth: number }[] } {
+function huffmanWPL(nodes: TreeNodes): { wpl: number; leaves: { key: string; weight: number; depth: number }[] } {
   const depthOf = (id: string): number => {
     let d = 0;
     let cur: VisualTreeNode | undefined = nodes[id];
@@ -557,7 +557,7 @@ describe("哈夫曼树", () => {
     const total = weights.reduce((a, b) => a + b, 0);
     expect(Number(nodes[rootId!].key)).toBe(total);
 
-    const { wpl, leaves } = huffmanWPL(nodes, rootId!);
+    const { wpl, leaves } = huffmanWPL(nodes);
     expect(leaves).toHaveLength(8);
     expect(leaves.map((l) => l.weight).sort((a, b) => a - b)).toEqual([...weights].sort((a, b) => a - b));
     // 最优 WPL 独立手算：贪心合并序列 3+5=8, 7+8=15, 8+11=19, 14+15=29,
@@ -587,7 +587,7 @@ describe("哈夫曼编码解码", () => {
     expect(rootId).toBeTruthy();
 
     // 字符按频率顺序标号 A..F：A=5,B=9,C=12,D=13,E=16,F=45
-    const { wpl, leaves } = huffmanWPL(nodes, rootId!);
+    const { wpl, leaves } = huffmanWPL(nodes);
     // 最优 WPL 独立手算：合并 5+9=14, 12+13=25, 14+16=30, 25+30=55, 45+55=100
     // WPL = 14+25+30+55+100 = 224
     expect(wpl).toBe(224);
@@ -603,7 +603,7 @@ describe("哈夫曼编码解码", () => {
 
     // 编码表：前缀码（任一码不是另一码的前缀）
     const codes: Record<string, string> = {};
-    for (const [id, n] of Object.entries(nodes)) {
+    for (const n of Object.values(nodes)) {
       const md = n.metadata as { isLeaf?: boolean; code?: string } | undefined;
       if (md?.isLeaf && md.code !== undefined) codes[String(n.key)] = md.code;
     }
@@ -620,7 +620,7 @@ describe("哈夫曼编码解码", () => {
       let bits = "";
       let cur: VisualTreeNode | undefined = nodes[leafId];
       while (cur?.parent) {
-        const p = nodes[cur.parent];
+        const p: VisualTreeNode = nodes[cur.parent];
         bits = (p.left === cur.id ? "0" : "1") + bits;
         cur = p;
       }
