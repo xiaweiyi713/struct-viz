@@ -893,10 +893,10 @@ export class RBTreeRuntime implements StructureRuntime {
 
       if (y.parent === zId) {
         // y 是 z 的直接右子节点
-        // x 的父节点设为 y（y 即将上移）
-        if (!this.isNilNode(xId)) {
-          this.setParent(xId, yId);
-        }
+        // x 的父节点设为 y（y 即将上移）；x 为 NIL 时同样必须设置，
+        // 因为 deleteFixup 依赖 parentOf(x) 定位，共享 NIL 节点的 parent
+        // 若不更新会残留上一次操作的值，导致在错误的兄弟节点上修复
+        this.setParent(xId, yId);
       } else {
         // y 不是 z 的直接右子节点
         // 先用 y 的右子树替换 y
@@ -1003,7 +1003,27 @@ export class RBTreeRuntime implements StructureRuntime {
 
       // 判断 x 是否为黑色（NIL 节点视为黑色）
       const xIsBlack = this.isNilNode(currentXId) || this.getNode(currentXId).color === "black";
-      if (!xIsBlack) break;
+      if (!xIsBlack) {
+        // x 为红色：直接染黑即可消除“双重黑色”，黑高恢复平衡，修复完成
+        const xNode = this.getNode(currentXId);
+        const oldColor = xNode.color;
+        xNode.color = "black";
+
+        recorder.record({
+          type: "RECOLOR",
+          title: "Delete 修复：x 为红色，直接染黑",
+          description:
+            `节点 ${xNode.key} 为红色（带有双重黑色）。将其染为黑色即可` +
+            `消除双重黑色，黑高恢复平衡。修复完成。`,
+          codeLine: line,
+          pseudoLine: 10,
+          targets: [currentXId],
+          payload: { recolors: [
+            { node: currentXId, from: oldColor, to: "black" as const },
+          ] },
+        });
+        break;
+      }
 
       // 获取 x 的父节点
       const xParentId = this.parentOf(currentXId);

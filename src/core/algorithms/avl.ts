@@ -352,17 +352,20 @@ export class AVLTreeRuntime implements StructureRuntime {
         targets: [targetId, childId],
       });
 
-      // 先断开 target 与其父节点的关系
+      // 先断开 target 与其父节点的关系（注意：unlinkNode 会清空父节点的
+      // 左右指针，因此必须先保存 target 是左/右孩子，后续判断才能正确）
+      const tParentId = target.parent;
+      const isLeftChild = tParentId !== null && this.getNode(tParentId).left === targetId;
       this.unlinkNode(targetId, recorder, line);
-      const rebalanceStart = target.parent;
+      const rebalanceStart = tParentId;
 
       // 将子节点连接到 target 原来的父节点位置
-      child.parent = target.parent;
-      if (target.parent === null) {
+      child.parent = tParentId;
+      if (tParentId === null) {
         this.rootId = childId;
       } else {
-        const parent = this.getNode(target.parent);
-        if (parent.left === targetId) parent.left = childId;
+        const parent = this.getNode(tParentId);
+        if (isLeftChild) parent.left = childId;
         else parent.right = childId;
       }
 
@@ -432,12 +435,15 @@ export class AVLTreeRuntime implements StructureRuntime {
         : successor.parent;
 
       // 先将后继从原位置摘除（后继最多有一个右子节点，不可能有左子节点）
+      // 注意：unlinkNode 会清空父节点的左右指针，因此先保存后继是左/右孩子
       if (successor.right !== null) {
         const succChild = this.getNode(successor.right);
+        const succParentId = successor.parent;
+        const succIsLeftChild = succParentId !== null && this.getNode(succParentId).left === successorId;
         this.unlinkNode(successorId, recorder, line);
-        const succParent = this.getNode(successor.parent!);
-        succChild.parent = successor.parent;
-        if (succParent.left === successorId) succParent.left = successor.right;
+        const succParent = this.getNode(succParentId!);
+        succChild.parent = succParentId;
+        if (succIsLeftChild) succParent.left = successor.right;
         else succParent.right = successor.right;
 
         recorder.record({
@@ -463,10 +469,12 @@ export class AVLTreeRuntime implements StructureRuntime {
         targets: [targetId, successorId],
       });
 
-      // 保存 target 的原有连接
+      // 保存 target 的原有连接（注意：unlinkNode 会清空父节点的左右指针，
+      // 因此必须先保存 target 是左/右孩子，否则后续判断恒走 else 分支）
       const tParent = target.parent;
       const tLeft = target.left;
       const tRight = target.right;
+      const targetIsLeftChild = tParent !== null && this.getNode(tParent).left === targetId;
 
       // 断开 target
       this.unlinkNode(targetId, recorder, line);
@@ -480,7 +488,7 @@ export class AVLTreeRuntime implements StructureRuntime {
         this.rootId = successorId;
       } else {
         const parent = this.getNode(tParent);
-        if (parent.left === targetId) parent.left = successorId;
+        if (targetIsLeftChild) parent.left = successorId;
         else parent.right = successorId;
       }
 
@@ -730,5 +738,15 @@ export class AVLTreeRuntime implements StructureRuntime {
 
     // 从新节点向上更新高度并重平衡
     this.rebalance(newNode.parent!, recorder, line, AVL_INSERT_PL);
+
+    // rebalance 会更新各节点 height，补一次最终快照使高度元数据与最终状态一致
+    recorder.record({
+      type: "MARK_FINAL",
+      title: `插入 ${key} 完成`,
+      description: `节点 ${key} 已成功插入，AVL 树已恢复平衡`,
+      codeLine: line,
+      pseudoLine: 16,
+      targets: [],
+    });
   }
 }
