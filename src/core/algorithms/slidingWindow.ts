@@ -183,6 +183,10 @@ export class SlidingWindowRuntime implements StructureRuntime {
           // 帧成功接收
           frames[i] = "highlighted";
           acked.add(i);
+          // 累计确认：base 前进到最早未确认帧（GBN 发送窗口按累计 ACK 滑动）
+          while (base < total && acked.has(base)) {
+            base++;
+          }
 
           this.snapshot(
             frames,
@@ -195,15 +199,7 @@ export class SlidingWindowRuntime implements StructureRuntime {
           );
         }
       }
-
-      // 如果没有丢失，移动 base
-      if (acked.has(base)) {
-        // 滑动窗口
-        while (base < total && acked.has(base)) {
-          frames[base] = "highlighted";
-          base++;
-        }
-      }
+      // base 已在 ACK 循环内按累计确认推进到最早未确认帧，无需额外滑动
     }
 
     // 最终状态

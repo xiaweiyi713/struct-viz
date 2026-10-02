@@ -1387,7 +1387,7 @@ crc.compute(1101011011, 10011);`,
     description:
       "Go-Back-N 滑动窗口协议：发送方维护一个大小为 N 的窗口，连续发送多个帧而不等待确认。若某帧丢失或出错，从该帧开始的所有帧都需要重传。",
     code: `SlidingWindow sw;
-sw.gbn(4, 8, 3, 6);`,
+sw.gbn(4, 8, 3, 7);`,
     supportedClass: "SlidingWindow",
   },
   {

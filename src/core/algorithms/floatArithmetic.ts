@@ -42,8 +42,8 @@ export class FloatArithmeticRuntime implements StructureRuntime {
     return f32[0];
   }
 
-  /** 二进制字符串的加法 */
-  private binaryAdd(a: string, b: string, bits: number): string {
+  /** 二进制字符串的加法，返回 { sum: 低 bits 位和, carry: 最高位进位 } */
+  private binaryAdd(a: string, b: string, bits: number): { sum: string; carry: number } {
     let carry = 0;
     const result: string[] = [];
     for (let i = bits - 1; i >= 0; i--) {
@@ -51,8 +51,7 @@ export class FloatArithmeticRuntime implements StructureRuntime {
       result.unshift(String(sum % 2));
       carry = Math.floor(sum / 2);
     }
-    // 如果有进位，截取低位
-    return result.slice(-bits).join("");
+    return { sum: result.slice(-bits).join(""), carry };
   }
 
   private binToItems(prefix: string, bin: string): VisualArrayItem[] {
@@ -162,12 +161,12 @@ export class FloatArithmeticRuntime implements StructureRuntime {
     const maxLen = Math.max(bigMant.length, alignedSmallMant.length);
     const paddedBig = bigMant.padEnd(maxLen, "0");
     const paddedSmall = alignedSmallMant.padEnd(maxLen, "0");
-    const sumMant = this.binaryAdd(paddedBig, paddedSmall, maxLen);
+    const { sum: sumMant, carry: carryOut } = this.binaryAdd(paddedBig, paddedSmall, maxLen);
 
     recorder.record({
       type: "FILL_CELL",
       title: "尾数相加",
-      description: `${paddedBig} + ${paddedSmall} = ${sumMant}。符号位: ${bigSign === smallSign ? "相同" : "不同"}`,
+      description: `${paddedBig} + ${paddedSmall} = ${carryOut ? "1 " : ""}${sumMant}${carryOut ? "（最高位产生进位）" : ""}。符号位: ${bigSign === smallSign ? "相同" : "不同"}`,
       codeLine: line,
       targets: [],
     });
@@ -183,20 +182,23 @@ export class FloatArithmeticRuntime implements StructureRuntime {
     let normShift = 0;
 
     // 检查是否需要左规或右规
-    if (sumMant[0] === "1" && sumMant.length > 24) {
-      // 右规
-      normalizedMant = sumMant.slice(0, sumMant.length - 1);
+    if (carryOut === 1) {
+      // 右规：尾数相加产生进位，真和为 25 位 "1"+sumMant（值 ≥ 2），
+      // 右移 1 位使之形如 1.xxx，阶码 +1
+      normalizedMant = "1" + sumMant.slice(0, 23);
       normalizedExp += 1;
       normShift = -1;
-    } else {
+    } else if (sumMant[0] === "0") {
       // 左规：找到第一个 1
-      const firstOne = normalizedMant.indexOf("1");
+      const firstOne = sumMant.indexOf("1");
       if (firstOne > 0) {
-        normalizedMant = normalizedMant.slice(firstOne) + "0".repeat(firstOne);
+        normalizedMant = sumMant.slice(firstOne) + "0".repeat(firstOne);
         normalizedExp -= firstOne;
         normShift = firstOne;
       }
+      // 全 0 则结果为 0，无需规格化
     }
+    // carryOut === 0 且首位为 1：已是 1.xxx 规格化形式，无需移动
 
     // 截取尾数部分（去掉隐含的 1）
     const finalMantissa = normalizedMant.length > 1
