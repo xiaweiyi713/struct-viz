@@ -328,7 +328,12 @@ export class HashTableRuntime implements StructureRuntime {
 
       const entry = bucket.entries[0];
       const wasDeleted = entry.status === "deleted";
-      entry.status = "active";
+      // 注意：查找必须是只读的。deleted 标记是懒惰删除的逻辑状态，
+      // 不能在这里改成 active，否则一次 search 就会"复活"已删除条目
+      // （计数器不变），导致后续 insert 误判为"键已存在"。
+      if (!wasDeleted) {
+        entry.status = "active";
+      }
 
       recorder.record({
         type: "COMPARE",

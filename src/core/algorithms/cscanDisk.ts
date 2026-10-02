@@ -150,7 +150,7 @@ export class CScanDiskRuntime implements StructureRuntime {
       recorder.record({
         type: "VISIT_NODE",
         title: "C-SCAN: 跳转到磁道 0",
-        description: `循环跳转到起始端，寻道距离=${currentPos}（不计入），累计寻道=${this.totalSeek}`,
+        description: `循环跳转到起始端，寻道距离=${currentPos}（计入总寻道），累计寻道=${this.totalSeek}`,
         codeLine: line,
         targets: ["track-0"],
       });

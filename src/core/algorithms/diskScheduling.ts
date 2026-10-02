@@ -152,9 +152,12 @@ export class DiskSchedulerRuntime implements StructureRuntime {
 
   private doSCAN(args: Literal[], recorder: TraceRecorder, line: number): void {
     this.initialHead = Number(args[0]);
-    // Last arg is direction (1 = outward/increasing, -1 = inward/decreasing)
+    // args: head, maxTrack, ...requests, direction (1 = outward/increasing, -1 = inward/decreasing)
+    // SCAN（电梯算法）定义：磁头沿当前方向一直移动到磁盘一端，服务沿途请求，然后反向。
+    // 注意区别于 LOOK（只到最远请求处就折返）。
+    const maxTrack = Number(args[1]);
     const direction = Number(args[args.length - 1]);
-    const requests = args.slice(1, args.length - 1).map(Number);
+    const requests = args.slice(2, args.length - 1).map(Number);
     this.headSequence = [];
     this.totalSeek = 0;
 
@@ -165,6 +168,24 @@ export class DiskSchedulerRuntime implements StructureRuntime {
       value: currentPos,
       status: "highlighted",
     });
+
+    const serveTrack = (track: number, phase: string) => {
+      const distance = Math.abs(track - currentPos);
+      this.totalSeek += distance;
+      currentPos = track;
+      this.headSequence.push({
+        id: this.nextId(),
+        value: track,
+        status: "active",
+      });
+      recorder.record({
+        type: "VISIT_NODE",
+        title: `SCAN: 移动到磁道 ${track}（${phase}）`,
+        description: `寻道距离=${distance}，累计寻道=${this.totalSeek}`,
+        codeLine: line,
+        targets: [`track-${track}`],
+      });
+    };
 
     // Separate requests into two groups based on direction
     const left: number[] = []; // tracks < head
@@ -182,80 +203,30 @@ export class DiskSchedulerRuntime implements StructureRuntime {
     right.sort((a, b) => a - b); // ascending
 
     if (direction === 1) {
-      // Outward (increasing): first go right, then reverse and go left
+      // Outward (increasing): serve right, go to the disk end, then reverse and serve left
       for (const track of right) {
-        const distance = Math.abs(track - currentPos);
-        this.totalSeek += distance;
-        currentPos = track;
-        this.headSequence.push({
-          id: this.nextId(),
-          value: track,
-          status: "active",
-        });
-        recorder.record({
-          type: "VISIT_NODE",
-          title: `SCAN: 移动到磁道 ${track}（向外）`,
-          description: `寻道距离=${distance}，累计寻道=${this.totalSeek}`,
-          codeLine: line,
-          targets: [`track-${track}`],
-        });
+        serveTrack(track, "向外");
       }
-      // Reverse: go left
+      // SCAN 到达磁盘末端（区别于 LOOK 的关键一步）
+      if (left.length > 0 && currentPos < maxTrack) {
+        serveTrack(maxTrack, "到达末端");
+      }
+      // Reverse: go left (descending)
       for (let i = left.length - 1; i >= 0; i--) {
-        const track = left[i];
-        const distance = Math.abs(track - currentPos);
-        this.totalSeek += distance;
-        currentPos = track;
-        this.headSequence.push({
-          id: this.nextId(),
-          value: track,
-          status: "active",
-        });
-        recorder.record({
-          type: "VISIT_NODE",
-          title: `SCAN: 移动到磁道 ${track}（反向）`,
-          description: `寻道距离=${distance}，累计寻道=${this.totalSeek}`,
-          codeLine: line,
-          targets: [`track-${track}`],
-        });
+        serveTrack(left[i], "反向");
       }
     } else {
-      // Inward (decreasing): first go left, then reverse and go right
+      // Inward (decreasing): serve left, go to track 0, then reverse and serve right
       for (let i = left.length - 1; i >= 0; i--) {
-        const track = left[i];
-        const distance = Math.abs(track - currentPos);
-        this.totalSeek += distance;
-        currentPos = track;
-        this.headSequence.push({
-          id: this.nextId(),
-          value: track,
-          status: "active",
-        });
-        recorder.record({
-          type: "VISIT_NODE",
-          title: `SCAN: 移动到磁道 ${track}（向内）`,
-          description: `寻道距离=${distance}，累计寻道=${this.totalSeek}`,
-          codeLine: line,
-          targets: [`track-${track}`],
-        });
+        serveTrack(left[i], "向内");
       }
-      // Reverse: go right
+      // SCAN 到达磁盘始端（区别于 LOOK 的关键一步）
+      if (right.length > 0 && currentPos > 0) {
+        serveTrack(0, "到达始端");
+      }
+      // Reverse: go right (ascending)
       for (const track of right) {
-        const distance = Math.abs(track - currentPos);
-        this.totalSeek += distance;
-        currentPos = track;
-        this.headSequence.push({
-          id: this.nextId(),
-          value: track,
-          status: "active",
-        });
-        recorder.record({
-          type: "VISIT_NODE",
-          title: `SCAN: 移动到磁道 ${track}（反向）`,
-          description: `寻道距离=${distance}，累计寻道=${this.totalSeek}`,
-          codeLine: line,
-          targets: [`track-${track}`],
-        });
+        serveTrack(track, "反向");
       }
     }
   }
