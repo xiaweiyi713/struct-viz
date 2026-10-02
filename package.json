@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node scripts/copy-monaco-vs.mjs",
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -19,6 +20,7 @@
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
     "framer-motion": "^12.39.0",
+    "monaco-editor": "0.55.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1",
