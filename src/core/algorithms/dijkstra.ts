@@ -637,15 +637,29 @@ export class GraphRuntime implements StructureRuntime {
 
       node.status = "final";
 
-      // 更新邻居的 key
-      for (const { edgeId, to, weight } of this.adjacency.get(minId)!) {
-        if (inMST.has(to)) continue;
+      // 更新邻居的 key。Prim 按无向图处理：考察所有与 minId 相连的边
+      // （包括以 minId 为终点的边），这与 Kruskal 的无向语义一致。
+      for (const edge of this.edges) {
+        let to: string | null = null;
+        if (edge.source === minId) {
+          to = edge.target;
+        } else if (edge.target === minId) {
+          to = edge.source;
+        }
+        if (!to || inMST.has(to)) continue;
 
-        const edge = this.edges.find((e) => e.id === edgeId)!;
+        const edgeId = edge.id;
+        const weight = edge.weight;
         edge.status = "active";
 
         if (weight < key.get(to)!) {
           const oldKey = key.get(to)!;
+          // 清除旧父边的 relaxed 高亮，避免被淘汰的边残留在最终 MST 统计中
+          const oldParent = parentEdge.get(to);
+          if (oldParent && oldParent !== edgeId) {
+            const oldEdge = this.edges.find((e) => e.id === oldParent)!;
+            if (oldEdge.status === "relaxed") oldEdge.status = "normal";
+          }
           key.set(to, weight);
           parentEdge.set(to, edgeId);
           edge.status = "relaxed";
@@ -672,7 +686,10 @@ export class GraphRuntime implements StructureRuntime {
       }
     }
 
-    const mstEdges = this.edges.filter((e) => e.status === "relaxed");
+    // 从 parentEdge 收集 MST 边（而非按 status 过滤，避免已淘汰的边被计入）
+    const mstEdges = [...parentEdge.values()].map(
+      (id) => this.edges.find((e) => e.id === id)!,
+    );
     const totalWeight = mstEdges.reduce((s, e) => s + e.weight, 0);
 
     recorder.record({
